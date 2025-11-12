@@ -1,0 +1,326 @@
+/* 页面设计器主容器 */
+.page-designer {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: #f5f5f5;
+}
+
+/* 顶部导航栏 */
+.designer-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 24px;
+  background: white;
+  border-bottom: 1px solid #e5e6eb;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+}
+
+/* 标签页导航 */
+.designer-tabs {
+  background: white;
+  border-bottom: 1px solid #e5e6eb;
+  padding: 0 24px;
+}
+
+/* 主要内容区域 */
+.designer-content {
+  flex: 1;
+  overflow: hidden;
+}
+
+/* 页面设计布局 */
+.design-layout {
+  display: flex;
+  height: 100%;
+  gap: 1px;
+  background: #e5e6eb;
+}
+
+/* 左侧控件选择区 */
+.widget-panel {
+  width: 280px;
+  background: white;
+  overflow-y: auto;
+}
+
+.widget-panel .arco-card {
+  height: 100%;
+  border: none;
+  border-radius: 0;
+}
+
+.widget-panel .arco-card-body {
+  padding: 16px;
+}
+
+/* 控件列表 */
+.widget-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* 可拖拽控件 */
+.draggable-widget {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+  border: 1px solid #e5e6eb;
+  border-radius: 6px;
+  background: white;
+  cursor: grab;
+  transition: all 0.2s;
+  user-select: none;
+}
+
+.draggable-widget:hover {
+  border-color: #7466f0;
+  box-shadow: 0 2px 8px rgba(116, 102, 240, 0.15);
+  transform: translateY(-1px);
+}
+
+.draggable-widget.dragging {
+  opacity: 0.5;
+  cursor: grabbing;
+}
+
+.widget-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  color: #7466f0;
+}
+
+.widget-name {
+  font-size: 14px;
+  color: #1d2129;
+  font-weight: 500;
+}
+
+/* 中部画布编辑区 */
+.canvas-panel {
+  flex: 1;
+  background: white;
+  overflow: auto;
+}
+
+.canvas-panel .arco-card {
+  height: 100%;
+  border: none;
+  border-radius: 0;
+}
+
+.canvas-panel .arco-card-body {
+  padding: 16px;
+  height: calc(100% - 48px);
+}
+
+/* 画布容器 */
+.canvas-container {
+  height: 100%;
+  background: #fafafa;
+  border: 1px solid #e5e6eb;
+  border-radius: 6px;
+  overflow: auto;
+  position: relative;
+}
+
+/* 画布网格 */
+.canvas-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: repeat(8, 80px);
+  gap: 1px;
+  padding: 16px;
+  min-height: calc(8 * 80px + 15px); /* 8行 * 80px高度 + 间隙 */
+  background: #f5f5f5;
+}
+
+/* 网格单元格 */
+.grid-cell {
+  background: white;
+  border: 1px dashed transparent;
+  border-radius: 4px;
+  position: relative;
+  transition: all 0.2s;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.grid-cell:hover {
+  border-color: #d4d4d8;
+  background: #f9f9f9;
+}
+
+.grid-cell.drop-target {
+  border-color: #7466f0;
+  background: rgba(116, 102, 240, 0.05);
+  border-style: solid;
+}
+
+.grid-cell.selected {
+  border-color: #7466f0;
+  background: rgba(116, 102, 240, 0.1);
+  border-style: solid;
+  box-shadow: 0 0 0 2px rgba(116, 102, 240, 0.2);
+}
+
+.grid-cell.has-widget {
+  border-color: #e5e6eb;
+  border-style: solid;
+  background: white;
+}
+
+/* 控件实例 */
+.widget-instance {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.widget-content {
+  padding: 8px;
+  background: #f7f8fa;
+  border: 1px solid #e5e6eb;
+  border-radius: 4px;
+  font-size: 12px;
+  color: #4e5969;
+  text-align: center;
+  width: 90%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.grid-cell.selected .widget-content {
+  border-color: #7466f0;
+  background: rgba(116, 102, 240, 0.05);
+}
+
+/* 右侧属性编辑面板 */
+.property-panel-container {
+  width: 320px;
+  background: white;
+  overflow-y: auto;
+}
+
+.property-panel-container .arco-card {
+  height: 100%;
+  border: none;
+  border-radius: 0;
+}
+
+.property-panel-container .arco-card-body {
+  padding: 16px;
+}
+
+/* 属性面板 */
+.property-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.property-panel-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 200px;
+  color: #86909c;
+  font-size: 14px;
+}
+
+.property-item {
+  padding: 8px 0;
+  border-bottom: 1px solid #f2f3f5;
+}
+
+.property-item:last-child {
+  border-bottom: none;
+}
+
+/* 其他布局 */
+.params-layout,
+.data-layout {
+  padding: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: #86909c;
+  font-size: 16px;
+}
+
+/* 响应式设计 */
+@media (max-width: 1200px) {
+  .widget-panel {
+    width: 240px;
+  }
+  
+  .property-panel-container {
+    width: 280px;
+  }
+}
+
+@media (max-width: 768px) {
+  .design-layout {
+    flex-direction: column;
+  }
+  
+  .widget-panel,
+  .property-panel-container {
+    width: 100%;
+    height: 200px;
+  }
+  
+  .canvas-panel {
+    height: 400px;
+  }
+}
+
+/* 滚动条样式 */
+.widget-panel::-webkit-scrollbar,
+.property-panel-container::-webkit-scrollbar,
+.canvas-container::-webkit-scrollbar {
+  width: 6px;
+}
+
+.widget-panel::-webkit-scrollbar-track,
+.property-panel-container::-webkit-scrollbar-track,
+.canvas-container::-webkit-scrollbar-track {
+  background: #f5f5f5;
+}
+
+.widget-panel::-webkit-scrollbar-thumb,
+.property-panel-container::-webkit-scrollbar-thumb,
+.canvas-container::-webkit-scrollbar-thumb {
+  background: #c9cdd4;
+  border-radius: 3px;
+}
+
+.widget-panel::-webkit-scrollbar-thumb:hover,
+.property-panel-container::-webkit-scrollbar-thumb:hover,
+.canvas-container::-webkit-scrollbar-thumb:hover {
+  background: #a9aeb8;
+}

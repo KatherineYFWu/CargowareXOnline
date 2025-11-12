@@ -1,0 +1,276 @@
+/* 矩阵编辑器样式 */
+.matrix-editor {
+  display: flex;
+  gap: 20px;
+  height: 100%;
+  padding: 16px;
+}
+
+.matrix-container {
+  flex: 1;
+  overflow: auto;
+  border: 1px solid #e5e6eb;
+  border-radius: 6px;
+  padding: 16px;
+  background: #fff;
+}
+
+.matrix-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.matrix-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.matrix-cell {
+  position: relative;
+  width: 120px;
+  height: 40px;
+  border: 1px solid #d9d9d9;
+  border-radius: 4px;
+  background: #fff;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.matrix-cell:hover {
+  border-color: #7466f0;
+  box-shadow: 0 0 0 2px rgba(116, 102, 240, 0.1);
+}
+
+.matrix-cell.selected {
+  border-color: #7466f0;
+  box-shadow: 0 0 0 2px rgba(116, 102, 240, 0.2);
+  background: rgba(116, 102, 240, 0.05);
+}
+
+.matrix-cell.first-column {
+  background: #f7f8fa;
+  border-color: #a891ff;
+}
+
+.matrix-cell.first-column:hover {
+  border-color: #7466f0;
+}
+
+.matrix-cell.first-column.selected {
+  background: rgba(168, 145, 255, 0.1);
+}
+
+.cell-input {
+  width: 100%;
+  height: 100%;
+  border: none;
+  background: transparent;
+  text-align: center;
+  font-size: 14px;
+  padding: 0 8px;
+}
+
+.cell-input:focus {
+  box-shadow: none;
+  outline: none;
+}
+
+.cell-input .arco-input {
+  border: none;
+  background: transparent;
+  text-align: center;
+  padding: 0;
+}
+
+.drag-handle {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #999;
+  cursor: grab;
+  opacity: 0;
+  transition: opacity 0.2s;
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 2px;
+}
+
+.matrix-cell:hover .drag-handle {
+  opacity: 1;
+}
+
+.drag-handle:active {
+  cursor: grabbing;
+}
+
+.row-operations {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-left: 8px;
+}
+
+.add-column-btn,
+.delete-column-btn {
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+}
+
+.add-column-btn {
+  color: #00b42a;
+}
+
+.add-column-btn:hover {
+  background: rgba(0, 180, 42, 0.1);
+  color: #00b42a;
+}
+
+.delete-column-btn {
+  color: #f53f3f;
+}
+
+.delete-column-btn:hover {
+  background: rgba(245, 63, 63, 0.1);
+  color: #f53f3f;
+}
+
+.property-panel {
+  width: 280px;
+  flex-shrink: 0;
+}
+
+.property-panel .arco-card {
+  height: fit-content;
+}
+
+.property-panel .arco-form-item {
+  margin-bottom: 16px;
+}
+
+.property-panel .arco-form-item:last-child {
+  margin-bottom: 0;
+}
+
+/* 拖拽状态样式 */
+.matrix-cell.dragging {
+  opacity: 0.5;
+  transform: rotate(2deg) scale(0.95);
+  z-index: 1000;
+}
+
+.matrix-cell.drag-over {
+  border-color: #7466f0;
+  background: rgba(116, 102, 240, 0.1);
+  transform: scale(1.02);
+}
+
+.matrix-cell.drag-over.first-column {
+  background: rgba(168, 145, 255, 0.2);
+}
+
+/* 必填字段样式 */
+.matrix-cell.required {
+  border-color: #f53f3f;
+}
+
+.matrix-cell.required::after {
+  content: '*';
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  color: #f53f3f;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+/* 动画效果 */
+@keyframes cellHighlight {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+.matrix-cell.highlight {
+  animation: cellHighlight 0.3s ease-in-out;
+}
+
+/* 响应式设计 */
+@media (max-width: 1200px) {
+  .matrix-editor {
+    flex-direction: column;
+  }
+  
+  .property-panel {
+    width: 100%;
+  }
+  
+  .matrix-cell {
+    width: 100px;
+    height: 36px;
+  }
+}
+
+@media (max-width: 768px) {
+  .matrix-editor {
+    padding: 12px;
+    gap: 16px;
+  }
+  
+  .matrix-container {
+    padding: 12px;
+  }
+  
+  .matrix-cell {
+    width: 80px;
+    height: 32px;
+  }
+  
+  .cell-input {
+    font-size: 12px;
+    padding: 0 4px;
+  }
+  
+  .row-operations {
+    gap: 2px;
+  }
+  
+  .add-column-btn,
+  .delete-column-btn {
+    width: 20px;
+    height: 20px;
+  }
+}
+
+/* 滚动条样式 */
+.matrix-container::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.matrix-container::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+.matrix-container::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 3px;
+}
+
+.matrix-container::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}

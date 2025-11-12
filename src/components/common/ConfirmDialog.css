@@ -1,0 +1,95 @@
+/* 确认对话框遮罩层 */
+.confirm-dialog-mask {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: fadeIn 0.2s ease-out;
+}
+
+/* 对话框主体 */
+.confirm-dialog {
+  background: white;
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  min-width: 416px;
+  max-width: 520px;
+  animation: zoomIn 0.2s ease-out;
+}
+
+/* 对话框头部 */
+.confirm-dialog-header {
+  padding: 16px 24px 8px;
+  border-bottom: none;
+}
+
+/* 对话框标题 */
+.confirm-dialog-title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 500;
+  color: #1d2129;
+  line-height: 1.5;
+}
+
+/* 对话框内容区域 */
+.confirm-dialog-body {
+  padding: 8px 24px 16px;
+}
+
+/* 对话框内容文本 */
+.confirm-dialog-content {
+  font-size: 14px;
+  color: #4e5969;
+  line-height: 1.5714;
+}
+
+/* 对话框底部按钮区域 */
+.confirm-dialog-footer {
+  padding: 16px 24px;
+  text-align: right;
+  border-top: 1px solid #f2f3f5;
+}
+
+/* 动画效果 */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes zoomIn {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .confirm-dialog {
+    min-width: 280px;
+    max-width: 90vw;
+    margin: 0 16px;
+  }
+  
+  .confirm-dialog-header,
+  .confirm-dialog-body,
+  .confirm-dialog-footer {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+}

@@ -1,0 +1,189 @@
+/* EDI配置页面样式 */
+.edi-config-container {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: #f5f5f5;
+}
+
+/* 顶部按钮区域 */
+.edi-config-header {
+  background: white;
+  padding: 16px 24px;
+  border-bottom: 1px solid #e5e6eb;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.header-buttons {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.header-buttons .arco-btn {
+  height: 36px;
+  padding: 0 16px;
+  font-size: 14px;
+}
+
+/* 主体布局 */
+.edi-config-layout {
+  flex: 1;
+  background: transparent;
+}
+
+/* 左侧字典区 */
+.edi-config-sider {
+  background: white;
+  border-right: 1px solid #e5e6eb;
+  height: 100%;
+}
+
+.dictionary-section {
+  height: 100%;
+  padding: 16px;
+}
+
+.dictionary-card {
+  height: 100%;
+  border: none;
+  box-shadow: none;
+}
+
+.dictionary-card .arco-card-body {
+  height: calc(100% - 48px);
+  padding: 0;
+  overflow: hidden;
+}
+
+.tree-section {
+  margin-bottom: 24px;
+  max-height: 45%;
+  overflow-y: auto;
+}
+
+.tree-section:last-child {
+  margin-bottom: 0;
+}
+
+/* 树形组件样式 */
+.arco-tree {
+  background: transparent;
+}
+
+.arco-tree-node {
+  padding: 4px 0;
+}
+
+.arco-tree-node-title {
+  font-size: 13px;
+  color: #4e5969;
+}
+
+.arco-tree-node-selected .arco-tree-node-title {
+  color: #165dff;
+  font-weight: 500;
+}
+
+.arco-tree-node-icon {
+  margin-right: 6px;
+  color: #86909c;
+}
+
+/* 右侧编辑区 */
+.edi-config-content {
+  background: transparent;
+  padding: 16px;
+}
+
+.editor-card {
+  height: 100%;
+  border: none;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.editor-card .arco-card-body {
+  height: calc(100% - 48px);
+  padding: 0;
+}
+
+.template-editor {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.editor-canvas {
+  flex: 1;
+  background: #fafafa;
+  border: 2px dashed #d9d9d9;
+  border-radius: 8px;
+  margin: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+}
+
+.canvas-placeholder {
+  text-align: center;
+  color: #86909c;
+}
+
+.canvas-placeholder p {
+  margin: 8px 0;
+  font-size: 14px;
+}
+
+.canvas-placeholder p:first-of-type {
+  font-size: 16px;
+  font-weight: 500;
+  color: #4e5969;
+}
+
+/* 响应式设计 */
+@media (max-width: 1200px) {
+  .edi-config-sider {
+    width: 250px !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .edi-config-container {
+    height: auto;
+    min-height: 100vh;
+  }
+  
+  .edi-config-layout {
+    flex-direction: column;
+  }
+  
+  .edi-config-sider {
+    width: 100% !important;
+    height: auto;
+    max-height: 300px;
+  }
+  
+  .header-buttons {
+    flex-wrap: wrap;
+  }
+}
+
+/* 滚动条样式 */
+.tree-section::-webkit-scrollbar {
+  width: 6px;
+}
+
+.tree-section::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+.tree-section::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 3px;
+}
+
+.tree-section::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
