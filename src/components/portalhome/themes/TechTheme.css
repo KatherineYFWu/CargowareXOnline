@@ -1,0 +1,683 @@
+/**
+ * Tech Theme Styles
+ * 
+ * A futuristic, cutting-edge theme showcasing innovation and technology
+ * Requirements: 6.1, 6.2, 6.3, 6.4, 6.5, 6.6, 6.7, 6.8, 6.9
+ */
+
+/* =================================
+   Theme Root Variables
+   ================================= */
+
+[data-theme="tech"] {
+  /* Color Variables - Requirement 6.1 */
+  --color-primary: #050505;        /* Deep space black */
+  --color-secondary: #00F0FF;      /* Cyber cyan */
+  --color-accent: #BC13FE;         /* Neon purple */
+  --color-background: #0A0A0F;     /* Dark background */
+  --color-surface: #050505;        /* Black surface */
+  --color-text: #00F0FF;           /* Cyan text */
+  --color-text-secondary: #8B8B9F; /* Gray secondary text */
+  --color-cyan-light: #5FFBFF;
+  --color-cyan-dark: #00B8C4;
+  --color-purple-light: #D946EF;
+  --color-grid: rgba(0, 240, 255, 0.15);
+  
+  /* Typography Variables - Requirement 6.2 */
+  --font-family: 'Roboto Mono', 'Fira Code', 'Courier New', monospace;
+  --font-weight-heading: 700;
+  --font-weight-body: 400;
+  --font-weight-medium: 500;
+  --letter-spacing: 0.05em;
+  --text-transform: uppercase;
+  
+  /* Spacing Variables */
+  --spacing-unit: 16px;
+  --spacing-small: 8px;
+  --spacing-medium: 16px;
+  --spacing-large: 24px;
+  --spacing-xlarge: 48px;
+  --border-radius: 0px;
+  
+  /* Animation Variables */
+  --transition-duration: 300ms;
+  --transition-timing: cubic-bezier(0.4, 0, 0.2, 1);
+  --glitch-duration: 0.3s;
+  --scan-line-speed: 8s;
+  
+  /* Glow Effects - Requirement 6.4 */
+  --glow-cyan: 0 0 10px #00F0FF, 0 0 20px #00F0FF, 0 0 30px #00F0FF;
+  --glow-purple: 0 0 10px #BC13FE, 0 0 20px #BC13FE, 0 0 30px #BC13FE;
+  --glow-cyan-sm: 0 0 5px #00F0FF, 0 0 10px #00F0FF;
+  --glow-purple-sm: 0 0 5px #BC13FE, 0 0 10px #BC13FE;
+  
+  /* Shadow Variables */
+  --shadow-sm: 0 2px 8px rgba(0, 240, 255, 0.2);
+  --shadow-md: 0 8px 24px rgba(0, 240, 255, 0.3);
+  --shadow-lg: 0 16px 48px rgba(0, 240, 255, 0.4);
+}
+
+/* =================================
+   Base Styles
+   ================================= */
+
+[data-theme="tech"] {
+  background-color: var(--color-background);
+  color: var(--color-text);
+  font-family: var(--font-family);
+  font-weight: var(--font-weight-body);
+  letter-spacing: var(--letter-spacing);
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* Screen Flicker Effect - Requirement 6.6 */
+[data-theme="tech"]::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    transparent 50%,
+    rgba(0, 240, 255, 0.02) 50%
+  );
+  background-size: 100% 4px;
+  pointer-events: none;
+  z-index: 9998;
+  animation: techFlicker 0.15s infinite;
+}
+
+@keyframes techFlicker {
+  0% { opacity: 0.97; }
+  50% { opacity: 1; }
+  100% { opacity: 0.97; }
+}
+
+/* Animated Scan Lines - Requirement 6.6 */
+[data-theme="tech"]::after {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    to bottom,
+    transparent 0%,
+    rgba(0, 240, 255, 0.1) 50%,
+    transparent 100%
+  );
+  background-size: 100% 50px;
+  pointer-events: none;
+  z-index: 9997;
+  animation: techScanLine var(--scan-line-speed) linear infinite;
+}
+
+@keyframes techScanLine {
+  0% { transform: translateY(-100%); }
+  100% { transform: translateY(100vh); }
+}
+
+[data-theme="tech"] > * {
+  position: relative;
+  z-index: 2;
+}
+
+/* =================================
+   HUD-Style Layout - Requirement 6.3
+   ================================= */
+
+[data-theme="tech"] .tech-layout {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 var(--spacing-large);
+}
+
+[data-theme="tech"] .tech-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: var(--spacing-large);
+}
+
+/* Clipped Corners - Requirement 6.3 */
+[data-theme="tech"] .tech-clip-corner {
+  clip-path: polygon(
+    0 0,
+    calc(100% - 20px) 0,
+    100% 20px,
+    100% 100%,
+    20px 100%,
+    0 calc(100% - 20px)
+  );
+}
+
+[data-theme="tech"] .tech-clip-corner-sm {
+  clip-path: polygon(
+    0 0,
+    calc(100% - 10px) 0,
+    100% 10px,
+    100% 100%,
+    10px 100%,
+    0 calc(100% - 10px)
+  );
+}
+
+[data-theme="tech"] .tech-clip-corner-lg {
+  clip-path: polygon(
+    0 0,
+    calc(100% - 30px) 0,
+    100% 30px,
+    100% 100%,
+    30px 100%,
+    0 calc(100% - 30px)
+  );
+}
+
+/* =================================
+   Typography - Requirement 6.2
+   ================================= */
+
+[data-theme="tech"] h1,
+[data-theme="tech"] h2,
+[data-theme="tech"] h3,
+[data-theme="tech"] h4,
+[data-theme="tech"] h5,
+[data-theme="tech"] h6 {
+  font-family: var(--font-family);
+  font-weight: var(--font-weight-heading);
+  color: var(--color-text);
+  letter-spacing: var(--letter-spacing);
+  text-transform: var(--text-transform);
+  line-height: 1.2;
+}
+
+[data-theme="tech"] p {
+  font-family: var(--font-family);
+  font-weight: var(--font-weight-body);
+  color: var(--color-text);
+  line-height: 1.6;
+  letter-spacing: var(--letter-spacing);
+}
+
+[data-theme="tech"] .tech-text-secondary {
+  color: var(--color-text-secondary);
+}
+
+[data-theme="tech"] .tech-text-purple {
+  color: var(--color-accent);
+}
+
+[data-theme="tech"] .tech-text-glow {
+  text-shadow: var(--glow-cyan-sm);
+}
+
+/* Glitch Effect for Headings - Requirement 6.5 */
+[data-theme="tech"] .tech-glitch {
+  position: relative;
+  display: inline-block;
+}
+
+[data-theme="tech"] .tech-glitch::before,
+[data-theme="tech"] .tech-glitch::after {
+  content: attr(data-text);
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0.8;
+}
+
+[data-theme="tech"] .tech-glitch::before {
+  color: var(--color-secondary);
+  animation: techGlitchBefore var(--glitch-duration) infinite;
+  clip-path: polygon(0 0, 100% 0, 100% 45%, 0 45%);
+}
+
+[data-theme="tech"] .tech-glitch::after {
+  color: var(--color-accent);
+  animation: techGlitchAfter var(--glitch-duration) infinite;
+  clip-path: polygon(0 55%, 100% 55%, 100% 100%, 0 100%);
+}
+
+@keyframes techGlitchBefore {
+  0%, 100% { transform: translate(0); }
+  20% { transform: translate(-2px, 2px); }
+  40% { transform: translate(-2px, -2px); }
+  60% { transform: translate(2px, 2px); }
+  80% { transform: translate(2px, -2px); }
+}
+
+@keyframes techGlitchAfter {
+  0%, 100% { transform: translate(0); }
+  20% { transform: translate(2px, -2px); }
+  40% { transform: translate(2px, 2px); }
+  60% { transform: translate(-2px, -2px); }
+  80% { transform: translate(-2px, 2px); }
+}
+
+/* =================================
+   Card Styles with Glowing Borders - Requirement 6.4
+   ================================= */
+
+[data-theme="tech"] .tech-card {
+  background-color: var(--color-surface);
+  border: 2px solid var(--color-secondary);
+  box-shadow: var(--glow-cyan-sm);
+  padding: var(--spacing-large);
+  transition: all var(--transition-duration) var(--transition-timing);
+  position: relative;
+}
+
+[data-theme="tech"] .tech-card::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  background: linear-gradient(
+    45deg,
+    var(--color-secondary),
+    var(--color-accent),
+    var(--color-secondary)
+  );
+  background-size: 200% 200%;
+  animation: techBorderGlow 3s linear infinite;
+  opacity: 0;
+  transition: opacity var(--transition-duration) var(--transition-timing);
+  z-index: -1;
+}
+
+[data-theme="tech"] .tech-card:hover {
+  box-shadow: var(--glow-cyan);
+  transform: translateY(-4px);
+}
+
+[data-theme="tech"] .tech-card:hover::before {
+  opacity: 1;
+}
+
+@keyframes techBorderGlow {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+[data-theme="tech"] .tech-card-purple {
+  border-color: var(--color-accent);
+  box-shadow: var(--glow-purple-sm);
+}
+
+[data-theme="tech"] .tech-card-purple:hover {
+  box-shadow: var(--glow-purple);
+}
+
+/* =================================
+   Button Styles
+   ================================= */
+
+[data-theme="tech"] .tech-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-medium) var(--spacing-large);
+  font-weight: var(--font-weight-medium);
+  font-family: var(--font-family);
+  letter-spacing: var(--letter-spacing);
+  text-transform: var(--text-transform);
+  font-size: 0.875rem;
+  transition: all var(--transition-duration) var(--transition-timing);
+  cursor: pointer;
+  border: 2px solid var(--color-secondary);
+  background-color: transparent;
+  color: var(--color-secondary);
+  position: relative;
+  overflow: hidden;
+}
+
+[data-theme="tech"] .tech-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(0, 240, 255, 0.3),
+    transparent
+  );
+  transition: left 0.5s;
+}
+
+[data-theme="tech"] .tech-button:hover {
+  background-color: var(--color-secondary);
+  color: var(--color-primary);
+  box-shadow: var(--glow-cyan);
+  transform: translateY(-2px);
+}
+
+[data-theme="tech"] .tech-button:hover::before {
+  left: 100%;
+}
+
+[data-theme="tech"] .tech-button-primary {
+  background-color: var(--color-secondary);
+  color: var(--color-primary);
+  box-shadow: var(--glow-cyan-sm);
+}
+
+[data-theme="tech"] .tech-button-primary:hover {
+  box-shadow: var(--glow-cyan);
+}
+
+[data-theme="tech"] .tech-button-purple {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+
+[data-theme="tech"] .tech-button-purple:hover {
+  background-color: var(--color-accent);
+  color: var(--color-primary);
+  box-shadow: var(--glow-purple);
+}
+
+/* =================================
+   Header Styles
+   ================================= */
+
+[data-theme="tech"] .tech-header {
+  background-color: rgba(5, 5, 5, 0.95);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-bottom: 2px solid var(--color-secondary);
+  box-shadow: var(--glow-cyan-sm);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+[data-theme="tech"] .tech-nav-link {
+  color: var(--color-text);
+  font-weight: var(--font-weight-medium);
+  font-family: var(--font-family);
+  letter-spacing: var(--letter-spacing);
+  text-transform: var(--text-transform);
+  font-size: 0.875rem;
+  transition: all var(--transition-duration) var(--transition-timing);
+  text-decoration: none;
+  padding: var(--spacing-medium) var(--spacing-large);
+  position: relative;
+}
+
+[data-theme="tech"] .tech-nav-link::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background-color: var(--color-secondary);
+  box-shadow: var(--glow-cyan-sm);
+  transition: width var(--transition-duration) var(--transition-timing);
+}
+
+[data-theme="tech"] .tech-nav-link:hover {
+  color: var(--color-secondary);
+  text-shadow: var(--glow-cyan-sm);
+}
+
+[data-theme="tech"] .tech-nav-link:hover::after {
+  width: 100%;
+}
+
+/* =================================
+   Hero Section
+   ================================= */
+
+[data-theme="tech"] .tech-hero {
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-background) 100%);
+  color: var(--color-text);
+  padding: calc(var(--spacing-xlarge) * 2) 0;
+  position: relative;
+  overflow: hidden;
+  border-bottom: 2px solid var(--color-secondary);
+  box-shadow: 0 4px 20px rgba(0, 240, 255, 0.3);
+}
+
+[data-theme="tech"] .tech-hero-title {
+  font-family: var(--font-family);
+  font-size: 4rem;
+  font-weight: var(--font-weight-heading);
+  letter-spacing: var(--letter-spacing);
+  text-transform: var(--text-transform);
+  margin-bottom: var(--spacing-large);
+  line-height: 1.1;
+  text-shadow: var(--glow-cyan);
+}
+
+[data-theme="tech"] .tech-hero-subtitle {
+  font-family: var(--font-family);
+  font-size: 1.25rem;
+  font-weight: var(--font-weight-body);
+  color: var(--color-text-secondary);
+  margin-bottom: var(--spacing-xlarge);
+  line-height: 1.6;
+  letter-spacing: var(--letter-spacing);
+}
+
+/* =================================
+   Section Styles
+   ================================= */
+
+[data-theme="tech"] .tech-section {
+  padding: calc(var(--spacing-xlarge) * 1.5) 0;
+  position: relative;
+}
+
+[data-theme="tech"] .tech-section-title {
+  font-family: var(--font-family);
+  font-size: 3rem;
+  font-weight: var(--font-weight-heading);
+  color: var(--color-text);
+  letter-spacing: var(--letter-spacing);
+  text-transform: var(--text-transform);
+  margin-bottom: var(--spacing-large);
+  text-shadow: var(--glow-cyan-sm);
+}
+
+[data-theme="tech"] .tech-section-subtitle {
+  font-family: var(--font-family);
+  font-size: 1.125rem;
+  color: var(--color-text-secondary);
+  margin-bottom: var(--spacing-xlarge);
+  line-height: 1.6;
+  letter-spacing: var(--letter-spacing);
+}
+
+/* =================================
+   Feature Cards
+   ================================= */
+
+[data-theme="tech"] .tech-feature-card {
+  background-color: var(--color-surface);
+  border: 2px solid var(--color-secondary);
+  box-shadow: var(--glow-cyan-sm);
+  padding: var(--spacing-large);
+  transition: all var(--transition-duration) var(--transition-timing);
+  position: relative;
+}
+
+[data-theme="tech"] .tech-feature-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--color-secondary) 50%,
+    transparent 100%
+  );
+  opacity: 0;
+  transition: opacity var(--transition-duration) var(--transition-timing);
+}
+
+[data-theme="tech"] .tech-feature-card:hover {
+  box-shadow: var(--glow-cyan);
+  transform: translateY(-4px);
+  border-color: var(--color-cyan-light);
+}
+
+[data-theme="tech"] .tech-feature-card:hover::before {
+  opacity: 1;
+}
+
+[data-theme="tech"] .tech-feature-icon {
+  width: 4rem;
+  height: 4rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, rgba(0, 240, 255, 0.1) 0%, rgba(188, 19, 254, 0.1) 100%);
+  color: var(--color-secondary);
+  margin-bottom: var(--spacing-large);
+  transition: all var(--transition-duration) var(--transition-timing);
+  border: 2px solid var(--color-secondary);
+  box-shadow: var(--glow-cyan-sm);
+}
+
+[data-theme="tech"] .tech-feature-card:hover .tech-feature-icon {
+  background: linear-gradient(135deg, rgba(0, 240, 255, 0.2) 0%, rgba(188, 19, 254, 0.2) 100%);
+  box-shadow: var(--glow-cyan);
+  transform: scale(1.05);
+}
+
+/* =================================
+   Footer Styles
+   ================================= */
+
+[data-theme="tech"] .tech-footer {
+  background-color: var(--color-primary);
+  color: var(--color-text);
+  padding: calc(var(--spacing-xlarge) * 1.5) 0 var(--spacing-large);
+  border-top: 2px solid var(--color-secondary);
+  box-shadow: 0 -4px 20px rgba(0, 240, 255, 0.2);
+}
+
+[data-theme="tech"] .tech-footer-link {
+  color: var(--color-text-secondary);
+  transition: all var(--transition-duration) var(--transition-timing);
+  text-decoration: none;
+  font-family: var(--font-family);
+  font-weight: var(--font-weight-body);
+  letter-spacing: var(--letter-spacing);
+}
+
+[data-theme="tech"] .tech-footer-link:hover {
+  color: var(--color-secondary);
+  text-shadow: var(--glow-cyan-sm);
+}
+
+/* =================================
+   Utility Classes
+   ================================= */
+
+[data-theme="tech"] .tech-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 var(--spacing-large);
+}
+
+[data-theme="tech"] .tech-text-center {
+  text-align: center;
+}
+
+[data-theme="tech"] .tech-flex {
+  display: flex;
+}
+
+[data-theme="tech"] .tech-flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+[data-theme="tech"] .tech-gap-sm {
+  gap: var(--spacing-small);
+}
+
+[data-theme="tech"] .tech-gap-md {
+  gap: var(--spacing-medium);
+}
+
+[data-theme="tech"] .tech-gap-lg {
+  gap: var(--spacing-large);
+}
+
+/* =================================
+   Responsive Design
+   ================================= */
+
+@media (max-width: 1024px) {
+  [data-theme="tech"] .tech-hero-title {
+    font-size: 3rem;
+  }
+  
+  [data-theme="tech"] .tech-section-title {
+    font-size: 2.5rem;
+  }
+}
+
+@media (max-width: 768px) {
+  [data-theme="tech"] .tech-hero-title {
+    font-size: 2.5rem;
+  }
+  
+  [data-theme="tech"] .tech-section-title {
+    font-size: 2rem;
+  }
+  
+  [data-theme="tech"] .tech-card,
+  [data-theme="tech"] .tech-feature-card {
+    padding: var(--spacing-medium);
+  }
+  
+  /* Reduce glow effects on mobile for performance */
+  [data-theme="tech"] .tech-card,
+  [data-theme="tech"] .tech-feature-card,
+  [data-theme="tech"] .tech-button {
+    box-shadow: none;
+  }
+  
+  [data-theme="tech"] .tech-card:hover,
+  [data-theme="tech"] .tech-feature-card:hover,
+  [data-theme="tech"] .tech-button:hover {
+    box-shadow: var(--glow-cyan-sm);
+  }
+}
+
+@media (max-width: 480px) {
+  [data-theme="tech"] .tech-hero-title {
+    font-size: 2rem;
+  }
+  
+  [data-theme="tech"] .tech-section-title {
+    font-size: 1.75rem;
+  }
+  
+  [data-theme="tech"] .tech-hero-subtitle {
+    font-size: 1rem;
+  }
+  
+  /* Disable scan lines on small screens for performance */
+  [data-theme="tech"]::after {
+    display: none;
+  }
+}

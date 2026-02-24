@@ -1,6 +1,8 @@
 import { Suspense, lazy } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import { useModal } from '../contexts/ModalContext';
+import { ThemeProvider } from '../contexts/ThemeContext';
+import { ThemeErrorBoundary } from './common/ThemeErrorBoundary';
 import LeadFormModal from './common/LeadFormModal';
 import LoadingSpinner from './common/LoadingSpinner';
 import CookieConsent from './common/CookieConsent';
@@ -59,24 +61,25 @@ const AppContent = (/* eslint-disable-line no-empty-pattern */ {}: AppContentPro
         <Route path="/cookie-settings" element={<CookieSettings />} />
         <Route path="/fmc-qualification" element={<FMCQualification />} />
         <Route path="/super-freight" element={<SuperFreight />} />
-        <Route path="/portal" element={<Portal />} />
+        {/* Portal routes wrapped with ThemeProvider and ThemeErrorBoundary for theme context access and error handling */}
+        <Route path="/portal" element={<ThemeErrorBoundary><ThemeProvider><Portal /></ThemeProvider></ThemeErrorBoundary>} />
         <Route path="/walltech" element={<VuePortalBridge />} />
         <Route path="/walltech-vue3" element={<VuePortalBridge />} />
         <Route path="/walltech-vue3-sso-etower" element={<VueAuthBridge authType="sso" provider="etower" />} />
         <Route path="/walltech-vue3-sso-cargoware" element={<VueAuthBridge authType="sso" provider="cargoware" />} />
         <Route path="/walltech-vue3-auth" element={<VueAuthBridge authType="auth" />} />
-        <Route path="/portal/news" element={<NewsListPage />} />
-        <Route path="/portal/news/:id" element={<NewsDetailPage />} />
-        <Route path="/portal/business-services" element={<BusinessServicesPage />} />
-        <Route path="/portal/about-us" element={<AboutUsPage />} />
-        <Route path="/portal/auth" element={<AuthPageWrapper />} />
+        <Route path="/portal/news" element={<ThemeErrorBoundary><ThemeProvider><NewsListPage /></ThemeProvider></ThemeErrorBoundary>} />
+        <Route path="/portal/news/:id" element={<ThemeErrorBoundary><ThemeProvider><NewsDetailPage /></ThemeProvider></ThemeErrorBoundary>} />
+        <Route path="/portal/business-services" element={<ThemeErrorBoundary><ThemeProvider><BusinessServicesPage /></ThemeProvider></ThemeErrorBoundary>} />
+        <Route path="/portal/about-us" element={<ThemeErrorBoundary><ThemeProvider><AboutUsPage /></ThemeProvider></ThemeErrorBoundary>} />
+        <Route path="/portal/auth" element={<ThemeErrorBoundary><ThemeProvider><AuthPageWrapper /></ThemeProvider></ThemeErrorBoundary>} />
         <Route path="/staff/auth" element={<StaffAuthPageWrapper />} />
         <Route path="/sample-staff-register" element={<SampleStaffRegisterWrapper />} />
         <Route path="/sample-expired-link" element={<SampleExpiredLinkWrapper />} />
         <Route path="/sso/auth/:provider" element={<SSOAuthPageWrapper />} />
         <Route path="/profile" element={<ProfilePageWrapper />} />
         <Route path="/company" element={<CompanyPageWrapper />} />
-        <Route path="/controltower/*" element={<ControlTower />} />
+        <Route path="/controltower/*" element={<ThemeErrorBoundary><ThemeProvider><ControlTower /></ThemeProvider></ThemeErrorBoundary>} />
         <Route path="/controltower-client/*" element={<ControlTowerClient />} />
         <Route path="/platformadmin/*" element={<PlatformAdmin />} />
         <Route path="/mpci/*" element={<MPCI />} />

@@ -19,9 +19,10 @@ import {
   Avatar,
   Badge
 } from '@arco-design/web-react';
-import { IconCheck, IconEdit, IconDelete, IconEye, IconEyeInvisible, IconStar, IconUser, IconClockCircle, IconSend, IconInfoCircle } from '@arco-design/web-react/icon';
+import { IconCheck, IconEdit, IconDelete, IconEye, IconEyeInvisible, IconStar, IconUser, IconClockCircle, IconSend, IconInfoCircle, IconSearch } from '@arco-design/web-react/icon';
 import NotificationSubscriptionSettings from './NotificationSubscriptionSettings';
 import NotificationTemplateSettings from './NotificationTemplateSettings';
+import { TemplateProvider } from '../../../contexts/TemplateContext';
 
 const { Title } = Typography;
 const { TabPane } = Tabs;
@@ -190,6 +191,8 @@ const mockWeChatWorkConfigs: WeChatWorkConfig[] = [
   }
 ];
 
+
+
 // 已发送邮件模拟数据
 const mockSentEmails: SentEmail[] = [
   {
@@ -282,6 +285,11 @@ const AlertCenter: React.FC = () => {
   const [showWechatSecret, setShowWechatSecret] = useState(false);
   const [wechatForm] = Form.useForm();
 
+  // 通知配置子页签状态
+  const [notificationConfigActiveTab, setNotificationConfigActiveTab] = useState('email-config');
+
+
+
   // 已发送邮件相关状态
   const [sentEmails, setSentEmails] = useState<SentEmail[]>(mockSentEmails);
   const [filteredSentEmails, setFilteredSentEmails] = useState<SentEmail[]>(mockSentEmails);
@@ -291,6 +299,10 @@ const AlertCenter: React.FC = () => {
   const [currentSentEmail, setCurrentSentEmail] = useState<SentEmail | null>(null);
   const [recipientModalVisible, setRecipientModalVisible] = useState(false);
   const [currentRecipients, setCurrentRecipients] = useState<RecipientDetail[]>([]);
+
+
+
+
 
   // 企微API配置列表列定义
   const wechatConfigColumns = [
@@ -890,7 +902,7 @@ const getStatusColor = (status: string) => {
         const truncatedText = displayText.length > 50 ? 
           displayText.substring(0, 47) + '...' : displayText;
         
-        return (
+  return (
           <Tooltip content={recipients.join(', ')}>
             <span 
               style={{ 
@@ -1953,26 +1965,7 @@ const getStatusColor = (status: string) => {
   // 企微API配置表单弹窗
   const renderWechatConfigFormModal = (isEdit: boolean) => (
     <Modal
-      title={
-        <div style={{ 
-          fontSize: '18px', 
-          fontWeight: 500, 
-          padding: '16px 24px', 
-          borderBottom: '1px solid #e5e6eb',
-          margin: '-24px -24px 0 -24px',
-          borderRadius: '8px 8px 0 0',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between'
-        }}>
-          <span>{isEdit ? '编辑企微API配置' : '新建企微API配置'}</span>
-          {wechatTestSuccess && (
-            <Tag color="green" style={{ marginLeft: '8px' }}>
-              测试通过
-            </Tag>
-          )}
-        </div>
-      }
+      title={isEdit ? '编辑企微API配置' : '新建企微API配置'}
       visible={isEdit ? wechatEditModalVisible : wechatCreateModalVisible}
       onCancel={() => {
         if (isEdit) setWechatEditModalVisible(false);
@@ -1981,18 +1974,6 @@ const getStatusColor = (status: string) => {
         setWechatTestSuccess(false);
       }}
       footer={[
-        <Button 
-          key="test" 
-          onClick={handleWechatTestConfig}
-          style={{ 
-            marginRight: 'auto',
-            borderColor: '#7466F0',
-            color: '#7466F0',
-            borderRadius: '4px'
-          }}
-        >
-          测试配置
-        </Button>,
         <Button 
           key="cancel" 
           onClick={() => {
@@ -2025,6 +2006,21 @@ const getStatusColor = (status: string) => {
       style={{ width: 600, borderRadius: '8px' }}
       bodyStyle={{ padding: '24px' }}
     >
+      {wechatTestSuccess && (
+        <div style={{ 
+          background: '#f6ffed', 
+          border: '1px solid #b7eb8f', 
+          borderRadius: '4px', 
+          padding: '12px 16px', 
+          marginBottom: '20px',
+          color: '#52c41a',
+          display: 'flex',
+          alignItems: 'center'
+        }}>
+          <IconCheck style={{ marginRight: '8px', fontSize: '18px' }} />
+          <span style={{ fontWeight: 500 }}>测试通过</span>
+        </div>
+      )}
       <Form
         form={wechatForm}
         layout="vertical"
@@ -2068,6 +2064,7 @@ const getStatusColor = (status: string) => {
           }
           field="corpId"
           rules={[
+            { required: true, message: '企业ID未填写' },
             { max: 250, message: '企业ID过长' }
           ]}
         >
@@ -2328,21 +2325,34 @@ const getStatusColor = (status: string) => {
     </Modal>
   );
 
+
+
+
+
+
+
   return (
-    <div style={{ padding: '24px' }}>
-      <Card>
-        <Tabs 
-          activeTab={activeTab} 
-          onChange={setActiveTab}
-          type="card"
-        >
-          <TabPane key="notification-subscription" title="通知/订阅设置">
-            <NotificationSubscriptionSettings />
-          </TabPane>
-          <TabPane key="template-settings" title="通知模板设置">
-            <NotificationTemplateSettings />
-          </TabPane>
-          <TabPane key="email-config" title="邮箱配置">
+    <TemplateProvider>
+      <div style={{ padding: '24px' }}>
+        <Card>
+          <Tabs 
+            activeTab={activeTab} 
+            onChange={setActiveTab}
+            type="card"
+          >
+            <TabPane key="notification-subscription" title="通知订阅设置">
+              <NotificationSubscriptionSettings />
+            </TabPane>
+            <TabPane key="template-settings" title="通知模板设置">
+              <NotificationTemplateSettings />
+            </TabPane>
+          <TabPane key="notification-config" title="通知配置">
+            <Tabs 
+              activeTab={notificationConfigActiveTab} 
+              onChange={setNotificationConfigActiveTab}
+              type="line"
+            >
+              <TabPane key="email-config" title="邮箱配置">
             <div style={{ marginBottom: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
                 <Input
@@ -2442,7 +2452,11 @@ const getStatusColor = (status: string) => {
             />
           </TabPane>
           
-          <TabPane key="sent" title="已发邮件">
+
+
+        </Tabs>
+      </TabPane>
+      <TabPane key="sent" title="已发邮件">
             <div style={{ marginBottom: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
               <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
                 <Input
@@ -2502,8 +2516,8 @@ const getStatusColor = (status: string) => {
               scroll={{ x: 1200 }}
             />
           </TabPane>
-        </Tabs>
-      </Card>
+      </Tabs>
+    </Card>
 
       {/* 弹窗组件 */}
       {renderViewModal()}
@@ -2516,7 +2530,9 @@ const getStatusColor = (status: string) => {
       {renderWechatViewModal()}
       {renderWechatConfigFormModal(false)}
       {renderWechatConfigFormModal(true)}
-    </div>
+
+      </div>
+    </TemplateProvider>
   );
 };
 

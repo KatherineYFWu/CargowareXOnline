@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Layout, Menu, Button, Avatar, Breadcrumb, Dropdown, Divider, AutoComplete } from '@arco-design/web-react';
+import { Layout, Menu, Button, Avatar, Breadcrumb, Dropdown, Divider, AutoComplete, Badge } from '@arco-design/web-react';
 import {
   IconDashboard,
   IconList,
@@ -18,7 +18,8 @@ import {
   IconDownload,
   IconDelete,
   IconEye,
-  IconGift
+  IconGift,
+  IconNotification
 } from '@arco-design/web-react/icon';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUsers, faShip } from '@fortawesome/free-solid-svg-icons';
@@ -29,6 +30,7 @@ import '../ControlTowerStyles.css';
 import AIAssistant from './ai';
 import AIFullscreen from './AIFullscreen';
 import TabsComponent from './TabsComponent';
+import MessageCenter, { generateMockMessages, MessageItem } from './MessageCenter';
 
 const { Header, Sider, Content } = Layout;
 const MenuItem = Menu.Item;
@@ -47,6 +49,8 @@ const ControlTowerLayout: React.FC<LayoutProps> = ({ children }) => {
   const [collapsed, setCollapsed] = useState(false);
   const [aiChatVisible, setAiChatVisible] = useState(false);
   const [aiFullscreenVisible, setAiFullscreenVisible] = useState(false);
+  const [messageCenterVisible, setMessageCenterVisible] = useState(false);
+  const [messages, setMessages] = useState<MessageItem[]>(generateMockMessages());
   const [searchValue, setSearchValue] = useState('');// 云文件下拉框状态
   const [cloudFileVisible, setCloudFileVisible] = useState(false);
   const [activeCloudTab, setActiveCloudTab] = useState('export');
@@ -78,6 +82,18 @@ const ControlTowerLayout: React.FC<LayoutProps> = ({ children }) => {
   // 检查是否为个人模式
   const urlParams = new URLSearchParams(location.search);
   const isPersonalMode = urlParams.get('mode') === 'personal';
+
+  // 监听外部打开AI助手事件
+  React.useEffect(() => {
+    const handleOpenAiAssistant = () => {
+      setAiChatVisible(true);
+    };
+
+    window.addEventListener('openAiAssistant', handleOpenAiAssistant);
+    return () => {
+      window.removeEventListener('openAiAssistant', handleOpenAiAssistant);
+    };
+  }, []);
 
   const toggleCollapse = () => setCollapsed(!collapsed);
 
@@ -1899,6 +1915,17 @@ const ControlTowerLayout: React.FC<LayoutProps> = ({ children }) => {
                 onClick={() => setCloudFileVisible(!cloudFileVisible)}
               />
             </Dropdown>
+            
+            {/* 消息中心按钮 */}
+            <Badge count={messages.filter(m => !m.read).length} offset={[-8, 8]} maxCount={99}>
+              <Button 
+                type="text" 
+                icon={<IconNotification />} 
+                style={{ margin: '0 8px' }}
+                onClick={() => setMessageCenterVisible(true)}
+              />
+            </Badge>
+
             <Dropdown
               droplist={
                 <Menu>
@@ -1963,6 +1990,12 @@ const ControlTowerLayout: React.FC<LayoutProps> = ({ children }) => {
           setAiFullscreenVisible(false);
           setAiChatVisible(true);
         }}
+      />
+      <MessageCenter 
+        visible={messageCenterVisible} 
+        onCancel={() => setMessageCenterVisible(false)} 
+        messages={messages}
+        onMessagesChange={setMessages}
       />
     </Layout>
   );

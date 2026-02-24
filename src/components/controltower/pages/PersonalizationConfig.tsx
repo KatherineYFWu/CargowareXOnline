@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Card, 
   Tabs, 
@@ -11,15 +11,20 @@ import {
   Radio,
   Upload,
   Typography,
-  Modal
+  Modal,
+  Spin
 } from '@arco-design/web-react';
 import { 
   IconSave,
   IconRefresh,
   IconUpload,
   IconPlus,
-  IconEdit
+  IconEdit,
+  IconCheck
 } from '@arco-design/web-react/icon';
+import { useTheme } from '../../../contexts/ThemeContext';
+import { ThemeType } from '../../../types/theme';
+import { getAllThemes } from '../../../config/themes';
 
 const { Text } = Typography;
 const { TabPane } = Tabs;
@@ -30,6 +35,18 @@ const PersonalizationConfig: React.FC = () => {
   const [form] = Form.useForm();
   const [logoFileList, setLogoFileList] = useState<any[]>([]);
   const [footerLogoFileList, setFooterLogoFileList] = useState<any[]>([]);
+  
+  // Theme management with ThemeContext
+  const { currentTheme, setTheme, isLoading: themeLoading } = useTheme();
+  const [selectedTheme, setSelectedTheme] = useState<ThemeType>(currentTheme);
+  const [isSavingTheme, setIsSavingTheme] = useState(false);
+  const [themeSaveError, setThemeSaveError] = useState<string | null>(null);
+  const allThemes = getAllThemes();
+  
+  // Sync selected theme with current theme from context
+  useEffect(() => {
+    setSelectedTheme(currentTheme);
+  }, [currentTheme]);
   
   // 自定义域名相关状态
   const [customDomain, setCustomDomain] = useState('abc123def456'); // 默认10位随机域名前缀
@@ -51,18 +68,48 @@ const PersonalizationConfig: React.FC = () => {
     wecom: { enabled: false, type: 'qr', value: '' }
   });
 
-  const handleSave = () => {
-    form.validate().then((values: any) => {
+  const handleSave = async () => {
+    try {
+      const values = await form.validate();
       console.log('保存的配置信息:', values);
       Message.success('配置保存成功！');
-    }).catch((error: any) => {
+    } catch (error: any) {
       console.error('表单验证失败:', error);
-    });
+    }
   };
 
   const handleReset = () => {
     form.resetFields();
+    setSelectedTheme('business');
     Message.info('配置已重置为默认值');
+  };
+
+  const handleThemeSelect = (themeId: ThemeType) => {
+    setSelectedTheme(themeId);
+  };
+
+  const handleThemeSave = async () => {
+    try {
+      setIsSavingTheme(true);
+      setThemeSaveError(null);
+      await setTheme(selectedTheme);
+      Message.success('主题保存成功！');
+    } catch (error) {
+      console.error('Failed to save theme:', error);
+      const errorMessage = error instanceof Error ? error.message : '主题保存失败';
+      setThemeSaveError(errorMessage);
+      Message.error({
+        content: '主题保存失败，请点击重试按钮再次尝试',
+        duration: 5000
+      });
+    } finally {
+      setIsSavingTheme(false);
+    }
+  };
+
+  const handleThemeRetry = async () => {
+    setThemeSaveError(null);
+    await handleThemeSave();
   };
 
   const handleLogoUpload = (info: any, type: 'header' | 'footer') => {
@@ -203,18 +250,190 @@ const PersonalizationConfig: React.FC = () => {
           >
             {/* 网站皮肤设置 */}
             <Card size="small" title="网站皮肤设置" style={{ marginBottom: 16 }}>
-              <Form.Item 
-                field="skinTheme" 
-                label="网站模板"
-                tooltip="选择网站的整体视觉风格"
-              >
-                <Radio.Group type="button">
-                  <Radio value="business">简约商务</Radio>
-                  <Radio value="premium">高端尊享</Radio>
-                  <Radio value="fresh">清新现代</Radio>
-                  <Radio value="tech">未来科技</Radio>
-                </Radio.Group>
-              </Form.Item>
+              <Text type="secondary" style={{ display: 'block', marginBottom: 16 }}>
+                选择网站的整体视觉风格，主题将应用到Portal首页
+              </Text>
+              
+              {themeLoading ? (
+                <div style={{ textAlign: 'center', padding: '40px 0' }}>
+                  <Spin />
+                  <div style={{ marginTop: 12, color: '#999' }}>加载主题中...</div>
+                </div>
+              ) : (
+                <>
+                  <div style={{ 
+                    display: 'grid', 
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', 
+                    gap: 16,
+                    marginBottom: 20
+                  }}>
+                    {allThemes.map((theme) => (
+                      <div
+                        key={theme.id}
+                        onClick={() => handleThemeSelect(theme.id)}
+                        style={{
+                          position: 'relative',
+                          border: selectedTheme === theme.id ? `3px solid ${theme.colors.accent}` : '2px solid #e5e7eb',
+                          borderRadius: 12,
+                          padding: 16,
+                          cursor: 'pointer',
+                          transition: 'all 0.3s ease',
+                          background: selectedTheme === theme.id ? `${theme.colors.accent}08` : '#fff',
+                          boxShadow: selectedTheme === theme.id 
+                            ? `0 4px 12px ${theme.colors.accent}40` 
+                            : '0 2px 4px rgba(0,0,0,0.05)',
+                          transform: selectedTheme === theme.id ? 'translateY(-2px)' : 'none'
+                        }}
+                      >
+                        {/* Selection indicator */}
+                        {selectedTheme === theme.id && (
+                          <div style={{
+                            position: 'absolute',
+                            top: 8,
+                            right: 8,
+                            width: 28,
+                            height: 28,
+                            borderRadius: '50%',
+                            background: theme.colors.accent,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            color: '#fff',
+                            fontSize: 14,
+                            fontWeight: 'bold',
+                            boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
+                          }}>
+                            <IconCheck />
+                          </div>
+                        )}
+                        
+                        {/* Theme name */}
+                        <div style={{ 
+                          fontSize: 16, 
+                          fontWeight: 600, 
+                          marginBottom: 12,
+                          color: selectedTheme === theme.id ? theme.colors.accent : '#1f2937'
+                        }}>
+                          {theme.name}
+                        </div>
+                        
+                        {/* Color preview */}
+                        <div style={{ 
+                          display: 'flex', 
+                          gap: 6, 
+                          marginBottom: 12 
+                        }}>
+                          <div style={{
+                            width: 32,
+                            height: 32,
+                            borderRadius: 6,
+                            background: theme.colors.primary,
+                            border: '1px solid rgba(0,0,0,0.1)'
+                          }} title="Primary" />
+                          <div style={{
+                            width: 32,
+                            height: 32,
+                            borderRadius: 6,
+                            background: theme.colors.secondary,
+                            border: '1px solid rgba(0,0,0,0.1)'
+                          }} title="Secondary" />
+                          <div style={{
+                            width: 32,
+                            height: 32,
+                            borderRadius: 6,
+                            background: theme.colors.accent,
+                            border: '1px solid rgba(0,0,0,0.1)'
+                          }} title="Accent" />
+                        </div>
+                        
+                        {/* Theme description */}
+                        <div style={{ 
+                          fontSize: 12, 
+                          color: '#6b7280',
+                          lineHeight: 1.5
+                        }}>
+                          {theme.id === 'business' && '专业、简洁的商务风格，适合企业客户'}
+                          {theme.id === 'premium' && '奢华、高端的尊享体验，彰显品质'}
+                          {theme.id === 'fresh' && '清新、现代的视觉设计，友好易用'}
+                          {theme.id === 'tech' && '未来科技感，展现创新实力'}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  
+                  {/* Error message display */}
+                  {themeSaveError && (
+                    <div style={{
+                      marginBottom: 16,
+                      padding: '12px 16px',
+                      background: 'linear-gradient(135deg, #fff2f0, #ffccc7)',
+                      border: '1px solid #ff4d4f',
+                      borderRadius: 8,
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 12
+                    }}>
+                      <div style={{
+                        fontSize: 20,
+                        color: '#ff4d4f'
+                      }}>
+                        ⚠️
+                      </div>
+                      <div style={{ flex: 1 }}>
+                        <div style={{
+                          fontSize: 14,
+                          fontWeight: 600,
+                          color: '#cf1322',
+                          marginBottom: 4
+                        }}>
+                          主题保存失败
+                        </div>
+                        <div style={{
+                          fontSize: 13,
+                          color: '#8c8c8c'
+                        }}>
+                          {themeSaveError}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Save button */}
+                  <div style={{ 
+                    display: 'flex', 
+                    justifyContent: 'center',
+                    gap: 12,
+                    paddingTop: 8,
+                    borderTop: '1px solid #e5e7eb'
+                  }}>
+                    <Button
+                      type="primary"
+                      size="large"
+                      icon={<IconSave />}
+                      loading={isSavingTheme}
+                      onClick={handleThemeSave}
+                      disabled={selectedTheme === currentTheme}
+                      style={{ minWidth: 160 }}
+                    >
+                      {selectedTheme === currentTheme ? '当前主题' : '保存主题'}
+                    </Button>
+                    
+                    {/* Manual retry button - shown when there's an error */}
+                    {themeSaveError && (
+                      <Button
+                        type="outline"
+                        size="large"
+                        icon={<IconRefresh />}
+                        loading={isSavingTheme}
+                        onClick={handleThemeRetry}
+                        style={{ minWidth: 120 }}
+                      >
+                        重试
+                      </Button>
+                    )}
+                  </div>
+                </>
+              )}
             </Card>
 
             {/* 基础信息设置 */}

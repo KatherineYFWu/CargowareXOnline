@@ -50,142 +50,48 @@
   background: linear-gradient(135deg, #ff7d00 0%, #ff9900 50%, #ff7d00 100%);
 }
 
-/* 客户端绸带 */
-.ribbon.green {
-  background: linear-gradient(135deg, #00b42a 0%, #00d935 50%, #00b42a 100%);
-}
-
-.control-tower-layout {
-  height: 100vh;
-}
-
-.control-tower-header {
-  background-color: white;
-  padding: 0 20px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-  height: 60px;
+.c-marker-icon {
   position: relative;
-  z-index: 10;
+  width: 20px;
+  height: 20px;
 }
 
-.logo-container {
-  display: flex;
-  align-items: center;
-  height: 100%;
+.c-marker-icon .c-pin {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #3370ff;
+  border: 2px solid #fff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  transform: translate(-50%, -50%);
 }
 
-.logo-icon {
-  font-size: 24px;
-  color: #165DFF;
+.c-marker-icon .c-pulse {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: rgba(51, 112, 255, 0.2);
+  transform: translate(-50%, -50%);
+  animation: marker-pulse 2s infinite;
 }
 
-.logo-text {
-  margin-left: 12px;
-  font-size: 18px;
-  font-weight: 600;
-  color: #1D2129;
+@keyframes marker-pulse {
+  0% {
+    transform: translate(-50%, -50%) scale(0.5);
+    opacity: 0.8;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1.5);
+    opacity: 0;
+  }
 }
 
-.header-right {
-  display: flex;
-  align-items: center;
-}
-
-.control-tower-sider {
-  background-color: white;
-  border-right: 1px solid #E5E6EB;
-}
-
-.control-tower-content {
-  padding: 24px;
-  background-color: #F2F3F5;
-  overflow-y: auto;
-}
-
-.page-header {
-  margin-bottom: 24px;
-}
-
-.page-header-desc {
-  margin-top: 8px;
-  color: #86909C;
-}
-
-.stat-card {
-  transition: all 0.3s ease;
-  background-color: var(--color-bg-2);
-  border-radius: 8px;
-}
-
-.stat-card:hover {
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-  transform: translateY(-2px);
-}
-
-.stat-card .text-2xl {
-  font-size: 28px;
-  font-weight: 600;
-  color: var(--color-text-1);
-  line-height: 1.2;
-}
-
-.stat-card .text-gray-500 {
-  color: var(--color-text-3);
-}
-
-.stat-card .text-green-500 {
-  color: rgb(0, 180, 42);
-}
-
-.stat-card .text-orange-500 {
-  color: rgb(255, 125, 0);
-}
-
-.stat-card .text-blue-500 {
-  color: rgb(22, 93, 255);
-}
-
-.stat-footer {
-  margin-top: 16px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-size: 13px;
-}
-
-.task-progress-card {
-  margin-bottom: 16px;
-  border-radius: 8px;
-}
-
-.progress-item {
-  margin-bottom: 16px;
-}
-
-.progress-item:last-child {
-  margin-bottom: 0;
-}
-
-.progress-info {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 8px;
-}
-
-.task-list-card {
-  margin-bottom: 16px;
-  border-radius: 8px;
-}
-
-.collapse-btn {
-  margin-left: 20px;
-  color: #4E5969;
-}
-
-/* 确保卡片在页面上平均分布 */
 .grid-cols-5 {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
@@ -193,6 +99,12 @@
 }
 
 @media (max-width: 1200px) {
+  .grid-cols-5 {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+@media (max-width: 992px) {
   .grid-cols-5 {
     grid-template-columns: repeat(3, 1fr);
   }
@@ -289,4 +201,72 @@
   display: flex;
   align-items: center;
   justify-content: center;
-} 
+}
+
+/* ------------------------------------------------------------------
+   优化后的红点样式 (Premium Red Dot)
+   实现反光材质、动态光影、圆度优化
+------------------------------------------------------------------ */
+.premium-red-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  /* 径向渐变模拟球体反光：左上角高光 */
+  background: radial-gradient(circle at 35% 35%, #ffbba9 0%, #f53f3f 60%, #cf1322 100%);
+  /* 阴影增加立体感和微弱发光 */
+  box-shadow: 
+    0 2px 4px rgba(245, 63, 63, 0.4), 
+    inset 0 1px 1px rgba(255, 255, 255, 0.6);
+  position: relative;
+  display: inline-block;
+  flex-shrink: 0;
+  /* 确保不被压缩 */
+}
+
+/* ------------------------------------------------------------------
+   数字徽标样式 (Premium Badge)
+   继承Premium质感，支持显示数字
+------------------------------------------------------------------ */
+.premium-badge {
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  border-radius: 9px; /* 圆角半径为高度一半 */
+  background: radial-gradient(circle at 30% 30%, #ffbba9 0%, #f53f3f 60%, #cf1322 100%);
+  box-shadow: 
+    0 2px 4px rgba(245, 63, 63, 0.4), 
+    inset 0 1px 1px rgba(255, 255, 255, 0.6);
+  
+  color: #fff;
+  font-size: 11px;
+  font-weight: 600;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  line-height: 18px;
+  text-align: center;
+  
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  
+  /* 防止数字换行 */
+  white-space: nowrap;
+}
+
+/* 呼吸动画效果，增强视觉吸引力 */
+@keyframes dot-breath {
+  0% {
+    box-shadow: 0 2px 4px rgba(245, 63, 63, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.6);
+  }
+  50% {
+    box-shadow: 0 0 8px rgba(245, 63, 63, 0.8), inset 0 1px 1px rgba(255, 255, 255, 0.6);
+  }
+  100% {
+    box-shadow: 0 2px 4px rgba(245, 63, 63, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.6);
+  }
+}
+
+.premium-red-dot.animate,
+.premium-badge.animate {
+  animation: dot-breath 3s ease-in-out infinite;
+}

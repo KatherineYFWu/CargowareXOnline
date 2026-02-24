@@ -451,7 +451,7 @@ const AIFullscreen: React.FC<AIFullscreenProps> = ({ visible, onClose, onExitFul
                           ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-br-md' 
                           : 'bg-white text-gray-700 border border-gray-200 rounded-bl-md shadow-sm'
                       }`}>
-                        {message.component ? message.component : message.text}
+                        {message.component ? message.component : message.text || ''}
                       </div>
                       {!message.isUser && (
                         <div className="flex items-center gap-2 mt-2 ml-2">
@@ -460,7 +460,7 @@ const AIFullscreen: React.FC<AIFullscreenProps> = ({ visible, onClose, onExitFul
                             size="small"
                             className="text-gray-400 hover:text-gray-600"
                             icon={<IconCopy />}
-                            onClick={() => handleMessageAction('copy', message.text)}
+                            onClick={() => message.text && handleMessageAction('copy', message.text)}
                             title="复制"
                           />
                           <Button
@@ -468,7 +468,7 @@ const AIFullscreen: React.FC<AIFullscreenProps> = ({ visible, onClose, onExitFul
                             size="small"
                             className="text-gray-400 hover:text-gray-600"
                             icon={<IconRefresh />}
-                            onClick={() => handleMessageAction('regenerate', message.text)}
+                            onClick={() => message.text && handleMessageAction('regenerate', message.text)}
                             title="重新回答"
                           />
                           <Button
@@ -476,7 +476,7 @@ const AIFullscreen: React.FC<AIFullscreenProps> = ({ visible, onClose, onExitFul
                             size="small"
                             className="text-gray-400 hover:text-green-600"
                             icon={<IconThumbUp />}
-                            onClick={() => handleMessageAction('like', message.text)}
+                            onClick={() => message.text && handleMessageAction('like', message.text)}
                             title="点赞"
                           />
                           <Button
@@ -484,7 +484,7 @@ const AIFullscreen: React.FC<AIFullscreenProps> = ({ visible, onClose, onExitFul
                             size="small"
                             className="text-gray-400 hover:text-red-600"
                             icon={<IconThumbDown />}
-                            onClick={() => handleMessageAction('dislike', message.text)}
+                            onClick={() => message.text && handleMessageAction('dislike', message.text)}
                             title="吐槽"
                           />
                         </div>

@@ -21,11 +21,11 @@ const PortalHeader: React.FC = () => {
   const handleMenuClick = (key: string) => {
     switch (key) {
       case 'profile':
-        // 跳转到客户版控制塔的个人信息页面
+        // Redirect to personal information page in client control tower
         navigate('/controltower-client#profile');
         break;
       case 'company':
-        // 跳转到客户版控制塔的企业信息页面
+        // Redirect to company information page in client control tower
         navigate('/controltower-client#company');
         break;
       case 'logout':
@@ -34,31 +34,31 @@ const PortalHeader: React.FC = () => {
     }
   };
 
-  // 用户下拉菜单
+  // User dropdown menu
   const userDropdownMenu = (
     <Menu onClickMenuItem={handleMenuClick}>
       <Menu.Item key="profile">
         <IconUser className="mr-2" />
-        个人中心
+        Profile
       </Menu.Item>
       <Menu.Item key="company">
         <IconSettings className="mr-2" />
-        企业信息
+        Company Info
       </Menu.Item>
       <Menu.Item key="divider" disabled style={{ height: '1px', padding: 0, margin: '4px 0', backgroundColor: '#f0f0f0' }} />
       <Menu.Item key="logout">
         <IconPoweroff className="mr-2" />
-        退出登录
+        Logout
       </Menu.Item>
     </Menu>
   );
 
   const navItems = [
-    { label: '首页', href: '/portal' },
-    { label: '控制塔', href: '/controltower-client' },
-    { label: '业务介绍', href: '/portal/business-services' },
-    { label: '资讯中心', href: '/portal/news' },
-    { label: '关于我们', href: '/portal/about-us' },
+    { label: 'Home', href: '/portal' },
+    { label: 'Control Tower', href: '/controltower-client' },
+    { label: 'Services', href: '/portal/business-services' },
+    { label: 'News', href: '/portal/news' },
+    { label: 'About Us', href: '/portal/about-us' },
   ];
 
   return (
@@ -109,7 +109,7 @@ const PortalHeader: React.FC = () => {
             className="bg-gradient-to-r from-blue-600 to-blue-400 border-0"
             onClick={() => navigate('/portal/auth')}
           >
-            注册/登录
+            Sign Up / Login
           </Button>
           )}
         </div>
@@ -154,7 +154,7 @@ const PortalHeader: React.FC = () => {
                   }}
                 >
                   <IconUser className="mr-2" />
-                  个人中心
+                  Profile
                 </button>
                 <button 
                   className="w-full text-left text-gray-700 hover:text-blue-600 py-2 font-medium flex items-center"
@@ -164,7 +164,7 @@ const PortalHeader: React.FC = () => {
                   }}
                 >
                   <IconSettings className="mr-2" />
-                  企业信息
+                  Company Info
                 </button>
                 <button 
                   className="w-full text-left text-red-600 hover:text-red-700 py-2 font-medium flex items-center"
@@ -174,7 +174,7 @@ const PortalHeader: React.FC = () => {
                   }}
                 >
                   <IconPoweroff className="mr-2" />
-                  退出登录
+                  Logout
                 </button>
               </div>
             ) : (
@@ -186,7 +186,7 @@ const PortalHeader: React.FC = () => {
                   navigate('/portal/auth');
                 }}
             >
-              注册/登录
+              Sign Up / Login
             </Button>
             )}
           </div>
@@ -196,4 +196,4 @@ const PortalHeader: React.FC = () => {
   );
 };
 
-export default PortalHeader; 
+export default PortalHeader;

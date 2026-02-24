@@ -195,21 +195,15 @@ const SchemeManagementModal: React.FC<SchemeManagementModalProps> = ({
           )}
           {/* 当前默认方案不显示删除按钮 */}
           {!record.isDefault && (
-            <Popconfirm
-              title="方案删除后无法恢复，确认删除？"
-              onOk={() => handleDelete(record.id)}
-              okText="确认"
-              cancelText="取消"
+            <Button 
+              type="text"
+              size="mini"
+              icon={<IconDelete />}
+              status="danger"
+              onClick={() => handleDelete(record.id)}
             >
-              <Button 
-                type="text"
-                size="mini"
-                icon={<IconDelete />}
-                status="danger"
-              >
-                删除
-              </Button>
-            </Popconfirm>
+              删除
+            </Button>
           )}
         </Space>
       )

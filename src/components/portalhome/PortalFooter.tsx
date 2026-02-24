@@ -18,28 +18,28 @@ const PortalFooter = () => {
 
   const footerLinks = [
     {
-      title: '产品',
+      title: 'Products',
       links: [
-        { label: '控制塔', href: '/portal/auth', onClick: () => navigate('/portal/auth') },
-        { label: '超级运价', href: '/portal/auth', onClick: () => navigate('/portal/auth') }
+        { label: 'Control Tower', href: '/portal/auth', onClick: () => navigate('/portal/auth') },
+        { label: 'Super Rates', href: '/portal/auth', onClick: () => navigate('/portal/auth') }
       ]
     },
     {
-      title: '解决方案',
+      title: 'Solutions',
       links: [
-        { label: '海运服务', href: '#' },
-        { label: '空运服务', href: '#' },
-        { label: '仓储服务', href: '#' },
-        { label: '关务服务', href: '#' }
+        { label: 'Ocean Freight', href: '#' },
+        { label: 'Air Freight', href: '#' },
+        { label: 'Warehousing', href: '#' },
+        { label: 'Customs Services', href: '#' }
       ]
     },
     {
-      title: '公司',
+      title: 'Company',
       links: [
-        { label: '关于我们', href: '/about' },
-        { label: '资讯中心', href: '/portal/news', onClick: () => navigate('/portal/news') },
-        { label: '联系我们', href: '#' },
-        { label: '员工登录', href: '/staff/auth', onClick: () => navigate('/staff/auth') }
+        { label: 'About Us', href: '/about' },
+        { label: 'News Center', href: '/portal/news', onClick: () => navigate('/portal/news') },
+        { label: 'Contact Us', href: '#' },
+        { label: 'Staff Login', href: '/staff/auth', onClick: () => navigate('/staff/auth') }
       ]
     }
   ];
@@ -48,7 +48,7 @@ const PortalFooter = () => {
     <footer className="bg-gray-50 pt-16 pb-8">
       <div className="container-custom">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-12">
-          {/* 公司信息 */}
+          {/* Company Information */}
           <div className="md:col-span-1">
             <div className="flex items-center mb-4">
               <div className="bg-gradient-to-r from-blue-600 to-blue-400 text-white w-10 h-10 rounded-lg flex items-center justify-center mr-3 relative overflow-hidden shadow-lg">
@@ -62,16 +62,16 @@ const PortalFooter = () => {
               </div>
             </div>
             <p className="text-gray-600 text-sm mb-4">
-              为全球国际物流提供智能化解决方案
+              Intelligent solutions for global international logistics
             </p>
             <div className="flex space-x-3 flex-wrap gap-y-2">
-              {/* 微信 */}
+              {/* WeChat */}
               <div 
                 className="relative"
                 onMouseEnter={() => setHoveredSocial('wechat')}
                 onMouseLeave={() => setHoveredSocial(null)}
               >
-                <button className="text-gray-400 hover:text-green-500 transition-colors duration-300" title="微信" aria-label="关注我们的微信">
+                <button className="text-gray-400 hover:text-green-500 transition-colors duration-300" title="WeChat" aria-label="Follow us on WeChat">
                   <FontAwesomeIcon icon={faWeixin} className="h-5 w-5" />
                 </button>
                 {hoveredSocial === 'wechat' && (
@@ -79,23 +79,23 @@ const PortalFooter = () => {
                     <div className="text-center">
                       <img 
                         src="/WX20250623-164557@2x.png" 
-                        alt="微信二维码" 
+                        alt="WeChat QR Code" 
                         className="w-32 h-32 mx-auto object-contain rounded-lg"
                       />
-                      <p className="text-xs text-gray-600 mt-3">扫码关注微信公众号</p>
+                      <p className="text-xs text-gray-600 mt-3">Scan to follow our WeChat official account</p>
                     </div>
                     <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-white"></div>
                   </div>
                 )}
               </div>
 
-              {/* 抖音/TikTok */}
+              {/* Douyin/TikTok */}
               <div 
                 className="relative"
                 onMouseEnter={() => setHoveredSocial('tiktok')}
                 onMouseLeave={() => setHoveredSocial(null)}
               >
-                <button className="text-gray-400 hover:text-pink-500 transition-colors duration-300" title="抖音/TikTok" aria-label="关注我们的抖音">
+                <button className="text-gray-400 hover:text-pink-500 transition-colors duration-300" title="Douyin/TikTok" aria-label="Follow us on Douyin">
                   <FontAwesomeIcon icon={faTiktok} className="h-5 w-5" />
                 </button>
                 {hoveredSocial === 'tiktok' && (
@@ -103,23 +103,23 @@ const PortalFooter = () => {
                     <div className="text-center">
                       <img 
                         src="/assets/qrcodes/douyin-qr.svg" 
-                        alt="抖音二维码" 
+                        alt="Douyin QR Code" 
                         className="w-32 h-32 mx-auto object-contain rounded-lg"
                       />
-                      <p className="text-xs text-gray-600 mt-3">扫码关注我们的抖音</p>
+                      <p className="text-xs text-gray-600 mt-3">Scan to follow our Douyin account</p>
                     </div>
                     <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-white"></div>
                   </div>
                 )}
               </div>
 
-              {/* 小红书 */}
+              {/* Xiaohongshu */}
               <div 
                 className="relative"
                 onMouseEnter={() => setHoveredSocial('xiaohongshu')}
                 onMouseLeave={() => setHoveredSocial(null)}
               >
-                <button className="text-gray-400 hover:text-red-500 transition-colors duration-300" title="小红书" aria-label="关注我们的小红书">
+                <button className="text-gray-400 hover:text-red-500 transition-colors duration-300" title="Xiaohongshu" aria-label="Follow us on Xiaohongshu">
                   <FontAwesomeIcon icon={faBookOpen} className="h-5 w-5" />
                 </button>
                 {hoveredSocial === 'xiaohongshu' && (
@@ -127,10 +127,10 @@ const PortalFooter = () => {
                     <div className="text-center">
                       <img 
                         src="/assets/qrcodes/xiaohongshu-qr.svg" 
-                        alt="小红书二维码" 
+                        alt="Xiaohongshu QR Code" 
                         className="w-32 h-32 mx-auto object-contain rounded-lg"
                       />
-                      <p className="text-xs text-gray-600 mt-3">扫码关注我们的小红书</p>
+                      <p className="text-xs text-gray-600 mt-3">Scan to follow our Xiaohongshu account</p>
                     </div>
                     <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-white"></div>
                   </div>
@@ -145,7 +145,7 @@ const PortalFooter = () => {
                   rel="noopener noreferrer"
                   className="text-gray-400 hover:text-blue-600 transition-colors duration-300" 
                   title="Facebook" 
-                  aria-label="关注我们的Facebook"
+                  aria-label="Follow us on Facebook"
                 >
                   <FontAwesomeIcon icon={faFacebook} className="h-5 w-5" />
                 </a>
@@ -159,7 +159,7 @@ const PortalFooter = () => {
                   rel="noopener noreferrer"
                   className="text-gray-400 hover:text-pink-600 transition-colors duration-300" 
                   title="Instagram" 
-                  aria-label="关注我们的Instagram"
+                  aria-label="Follow us on Instagram"
                 >
                   <FontAwesomeIcon icon={faInstagram} className="h-5 w-5" />
                 </a>
@@ -173,7 +173,7 @@ const PortalFooter = () => {
                   rel="noopener noreferrer"
                   className="text-gray-400 hover:text-red-600 transition-colors duration-300" 
                   title="YouTube" 
-                  aria-label="关注我们的YouTube"
+                  aria-label="Follow us on YouTube"
                 >
                   <FontAwesomeIcon icon={faYoutube} className="h-5 w-5" />
                 </a>
@@ -187,7 +187,7 @@ const PortalFooter = () => {
                   rel="noopener noreferrer"
                   className="text-gray-400 hover:text-blue-700 transition-colors duration-300" 
                   title="LinkedIn" 
-                  aria-label="关注我们的LinkedIn"
+                  aria-label="Follow us on LinkedIn"
                 >
                   <FontAwesomeIcon icon={faLinkedin} className="h-5 w-5" />
                 </a>
@@ -201,7 +201,7 @@ const PortalFooter = () => {
                   rel="noopener noreferrer"
                   className="text-gray-400 hover:text-black transition-colors duration-300" 
                   title="X (Twitter)" 
-                  aria-label="关注我们的X"
+                  aria-label="Follow us on X"
                 >
                   <FontAwesomeIcon icon={faXTwitter} className="h-5 w-5" />
                 </a>
@@ -209,7 +209,7 @@ const PortalFooter = () => {
             </div>
           </div>
 
-          {/* 链接列表 */}
+          {/* Link Lists */}
           {footerLinks.map((column, index) => (
             <div key={index} className="md:col-span-1">
               <h3 className="text-gray-800 font-semibold mb-4">{column.title}</h3>
@@ -235,20 +235,20 @@ const PortalFooter = () => {
           ))}
         </div>
 
-        {/* 底部版权信息 */}
+        {/* Bottom Copyright */}
         <div className="pt-8 border-t border-gray-200">
           <div className="flex flex-col md:flex-row justify-between items-center mb-4">
             <p className="text-gray-500 text-sm">
-              © 2025 WallTech. 保留所有权利.
+              © 2025 WallTech. All rights reserved.
             </p>
             <div className="flex space-x-6 mt-4 md:mt-0">
-              <a href="/privacy" className="text-gray-500 hover:text-primary text-sm">隐私政策</a>
-              <a href="/terms" className="text-gray-500 hover:text-primary text-sm">服务条款</a>
-              <a href="/cookie-settings" className="text-gray-500 hover:text-primary text-sm">Cookie 设置</a>
+              <a href="/privacy" className="text-gray-500 hover:text-primary text-sm">Privacy Policy</a>
+              <a href="/terms" className="text-gray-500 hover:text-primary text-sm">Terms of Service</a>
+              <a href="/cookie-settings" className="text-gray-500 hover:text-primary text-sm">Cookie Settings</a>
             </div>
           </div>
 
-          {/* 备案信息 */}
+          {/* Filing Information */}
           <div className="flex flex-col md:flex-row justify-center items-center space-y-2 md:space-y-0 md:space-x-4 text-xs text-gray-400">
             <a
               href="https://beian.miit.gov.cn/"
@@ -266,7 +266,7 @@ const PortalFooter = () => {
             >
               <img
                 src="/gongan.png"
-                alt="公安备案图标"
+                alt="Public Security Filing Icon"
                 className="h-4 mr-1"
               />
               <span>沪公网安备31010402005432号</span>
@@ -278,4 +278,4 @@ const PortalFooter = () => {
   );
 };
 
-export default PortalFooter; 
+export default PortalFooter;

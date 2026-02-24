@@ -8,7 +8,7 @@
       backgroundRepeat: 'no-repeat'
     }"
   >
-    <!-- 左侧渐变遮罩 -->
+    <!-- Left Gradient Overlay -->
     <div 
       class="absolute inset-0 z-0"
       :style="{
@@ -23,7 +23,7 @@
         <div class="lg:pr-8">
           <div class="mb-6">
             <span class="inline-flex items-center px-6 py-2 text-base bg-white text-blue-600 rounded-full font-medium shadow-lg">
-              WallTech 控制塔系统
+              WallTech Control Tower System
             </span>
           </div>
           <h1 
@@ -41,7 +41,7 @@
                 whiteSpace: 'nowrap'
               }"
             >
-              AI赋能的物流控制塔
+              AI-Powered Logistics Control Tower
             </span>
             <br />
             <span 
@@ -51,7 +51,7 @@
                 filter: 'drop-shadow(2px 2px 4px rgba(0,0,0,0.3))'
               }"
             >
-              协同系统
+              Collaboration System
             </span>
           </h1>
 
@@ -60,13 +60,13 @@
               class="h-10 md:h-12 px-6 md:px-8 bg-gradient-to-r from-blue-600 to-indigo-600 border-0 text-base md:text-lg shadow-lg hover:shadow-xl transition-all text-white"
               @click="handleExperience"
             >
-              立即体验
+              Experience Now
             </button>
             <button 
               class="h-10 md:h-12 px-6 md:px-8 border-2 border-white text-white text-base md:text-lg hover:bg-white hover:text-blue-600 transition-all"
               @click="handleDemo"
             >
-              预约演示
+              Request Demo
             </button>
           </div>
 
@@ -105,27 +105,27 @@
 // @ts-ignore
 import { reactive } from 'vue'
 
-// 优势指标数据
+// Advantage indicators data
 const advantages = reactive([
   {
-    text: "提升运营效率 80%+",
+    text: "80%+ Operational Efficiency Improvement",
     icon: "fas fa-chart-line",
-    color: "#1D4ED8" // 深蓝色
+    color: "#1D4ED8" // Deep blue
   },
   {
-    text: "降低人工成本 60%+",
+    text: "60%+ Labor Cost Reduction",
     icon: "fas fa-coins",
-    color: "#1D4ED8" // 深蓝色
+    color: "#1D4ED8" // Deep blue
   },
   {
-    text: "减少操作错误 90%+",
+    text: "90%+ Operational Error Reduction",
     icon: "fas fa-shield-alt",
-    color: "#1D4ED8" // 深蓝色
+    color: "#1D4ED8" // Deep blue
   },
   {
-    text: "加快响应速度 70%+",
+    text: "70%+ Response Speed Improvement",
     icon: "fas fa-bolt",
-    color: "#1D4ED8" // 深蓝色
+    color: "#1D4ED8" // Deep blue
   }
 ])
 
@@ -146,5 +146,5 @@ const handleDemo = () => {
 </script>
 
 <style scoped>
-/* PortalHero特定样式 */
-</style> 
+/* PortalHero specific styles */
+</style>

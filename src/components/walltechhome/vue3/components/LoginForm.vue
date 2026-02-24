@@ -1,48 +1,48 @@
 <template>
   <div>
-    <!-- 登录方式切换 -->
+    <!-- Login Method Switch -->
     <div class="auth-tab-container mb-6">
       <button
         :class="`auth-tab ${loginType === 'password' ? 'active' : ''}`"
         @click="setLoginType('password')"
       >
-        <span>密码登录</span>
+        <span>Password Login</span>
       </button>
       <button
         :class="`auth-tab ${loginType === 'code' ? 'active' : ''}`"
         @click="setLoginType('code')"
       >
-        <span>验证码登录</span>
+        <span>Verification Code Login</span>
       </button>
     </div>
 
     <form @submit.prevent="handleSubmit" class="space-y-4">
-      <!-- 账号输入 -->
+      <!-- Account Input -->
       <div>
         <label class="block text-gray-700 font-semibold mb-2">
-          {{ loginType === 'password' ? '邮箱或手机号' : '手机号或邮箱' }}
+          {{ loginType === 'password' ? 'Email or Phone Number' : 'Phone Number or Email' }}
         </label>
         <div class="relative">
           <i class="fas fa-user absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
           <input
             v-model="loginForm.account"
             type="text"
-            :placeholder="loginType === 'password' ? '请输入邮箱或手机号' : '请输入手机号或邮箱'"
+            :placeholder="loginType === 'password' ? 'Please enter email or phone number' : 'Please enter phone number or email'"
             class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
             required
           />
         </div>
       </div>
 
-      <!-- 密码输入 -->
+      <!-- Password Input -->
       <div v-if="loginType === 'password'">
-        <label class="block text-gray-700 font-semibold mb-2">密码</label>
+        <label class="block text-gray-700 font-semibold mb-2">Password</label>
         <div class="relative">
           <i class="fas fa-lock absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
           <input
             v-model="loginForm.password"
             :type="passwordVisible ? 'text' : 'password'"
-            placeholder="请输入密码"
+            placeholder="Please enter password"
             class="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
             required
           />
@@ -56,14 +56,14 @@
         </div>
       </div>
 
-      <!-- 验证码输入 -->
+      <!-- Verification Code Input -->
       <div v-else>
-        <label class="block text-gray-700 font-semibold mb-2">验证码</label>
+        <label class="block text-gray-700 font-semibold mb-2">Verification Code</label>
         <div class="flex space-x-3">
           <input
             v-model="loginForm.code"
             type="text"
-            placeholder="请输入验证码"
+            placeholder="Please enter verification code"
             class="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
             required
           />
@@ -73,41 +73,41 @@
             @click="handleSendCode"
             class="px-6 py-3 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors whitespace-nowrap"
           >
-            {{ countdown > 0 ? `${countdown}s` : '发送验证码' }}
+            {{ countdown > 0 ? `${countdown}s` : 'Send Code' }}
           </button>
         </div>
       </div>
 
-      <!-- 记住我和忘记密码 -->
+      <!-- Remember Me and Forgot Password -->
       <div v-if="loginType === 'password'" class="flex justify-between items-center">
         <label class="flex items-center text-gray-600 cursor-pointer">
           <input type="checkbox" class="mr-3 w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500" />
-          <span>记住我</span>
+          <span>Remember Me</span>
         </label>
         <button type="button" class="text-blue-600 hover:text-blue-700 font-medium">
-          忘记密码？
+          Forgot Password?
         </button>
       </div>
 
-      <!-- 登录按钮 -->
+      <!-- Login Button -->
       <button
         type="submit"
         :disabled="loading"
         class="w-full py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg font-semibold hover:from-blue-700 hover:to-blue-800 disabled:opacity-50 transition-all flex items-center justify-center"
       >
         <i v-if="loading" class="fas fa-spinner fa-spin mr-2"></i>
-        {{ loading ? '登录中...' : '立即登录' }}
+        {{ loading ? 'Logging in...' : 'Login Now' }}
       </button>
     </form>
 
-    <!-- 第三方登录 -->
+    <!-- Third-party Login -->
     <div class="mt-8">
       <div class="relative">
         <div class="absolute inset-0 flex items-center">
           <div class="w-full border-t border-gray-300"></div>
         </div>
         <div class="relative flex justify-center text-sm">
-          <span class="px-4 bg-white text-gray-500">其他登录方式</span>
+          <span class="px-4 bg-white text-gray-500">Other Login Methods</span>
         </div>
       </div>
 
@@ -149,7 +149,7 @@ const emit = defineEmits<{
   sendCode: []
 }>()
 
-// 使用状态管理
+// Use state management
 const {
   loginType,
   loginForm,
@@ -163,47 +163,47 @@ const {
 const router = useRouter()
 const { login } = useUser()
 
-// 处理表单提交
+// Handle form submission
 const handleSubmit = async () => {
-  // 验证表单
+  // Validate form
   if (!loginForm.value.account) {
-    alert('请输入账号')
+    alert('Please enter account')
     return
   }
   
   if (loginType.value === 'password' && !loginForm.value.password) {
-    alert('请输入密码')
+    alert('Please enter password')
     return
   }
   
   if (loginType.value === 'code' && !loginForm.value.code) {
-    alert('请输入验证码')
+    alert('Please enter verification code')
     return
   }
   
   emit('submit', loginForm.value)
 }
 
-// 发送验证码
+// Send verification code
 const handleSendCode = () => {
   if (!loginForm.value.account) {
-    alert('请先输入手机号或邮箱')
+    alert('Please enter phone number or email first')
     return
   }
   
   startCountdown()
   emit('sendCode')
-  alert('验证码已发送 📱')
+  alert('Verification code has been sent 📱')
 }
 
-// 第三方登录
+// Third-party login
 const handleThirdPartyLogin = (provider: string) => {
   if (provider === 'etower') {
     router.push('/sso/auth/etower')
   } else if (provider === 'cargoware') {
     router.push('/sso/auth/cargoware')
   } else {
-    alert(`${provider} 登录功能开发中...`)
+    alert(`${provider} login is under development...`)
   }
 }
 </script>
@@ -237,4 +237,4 @@ const handleThirdPartyLogin = (provider: string) => {
 .auth-tab:hover:not(.active) {
   color: #374151;
 }
-</style> 
+</style>

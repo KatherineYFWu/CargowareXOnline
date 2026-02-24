@@ -160,10 +160,10 @@ const BatchQuoteModal: React.FC<BatchQuoteModalProps> = ({
           ))}
         </div>
 
-        {/* 基于原价格快速加价 */}
+        {/* 固定价格加价 */}
         <div style={{ marginBottom: '16px' }}>
           <Title heading={6} style={{ color: '#1890ff', marginBottom: '12px', fontSize: '14px' }}>
-            基于原价格快速加价
+            固定价格加价
           </Title>
           
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>

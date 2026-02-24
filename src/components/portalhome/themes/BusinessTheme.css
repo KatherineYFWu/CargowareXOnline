@@ -1,0 +1,454 @@
+/**
+ * Business Theme Styles
+ * 
+ * A clean, professional theme for enterprise clients
+ * Requirements: 3.1, 3.2, 3.3, 3.4, 3.5, 3.6, 3.7
+ */
+
+/* =================================
+   Theme Root Variables
+   ================================= */
+
+[data-theme="business"] {
+  /* Color Variables - Requirement 3.1 */
+  --color-primary: #0F172A;      /* Deep navy */
+  --color-secondary: #64748B;    /* Titanium gray */
+  --color-accent: #3B82F6;       /* Cyan blue */
+  --color-background: #F8FAFC;   /* Light background */
+  --color-surface: #FFFFFF;      /* White surface */
+  --color-text: #0F172A;         /* Deep navy text */
+  --color-text-secondary: #64748B; /* Gray secondary text */
+  --color-success: #10B981;
+  --color-warning: #F59E0B;
+  --color-error: #EF4444;
+  
+  /* Typography Variables - Requirement 3.2 */
+  --font-family: Inter, Helvetica Neue, Microsoft YaHei, sans-serif;
+  --font-weight-heading: 700;
+  --font-weight-body: 400;
+  --font-weight-medium: 500;
+  
+  /* Spacing Variables - Requirement 3.3 */
+  --grid-columns: 12;
+  --card-gap: 24px;
+  --border-radius: 4px;          /* Micro-rounded corners (4px-6px) */
+  --border-radius-lg: 6px;
+  
+  /* Animation Variables */
+  --transition-duration: 200ms;
+  --transition-timing: ease;
+  
+  /* Shadow Variables - Requirement 3.4 */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --shadow-hover: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 5px 7px -2px rgba(0, 0, 0, 0.05);
+}
+
+/* =================================
+   Base Styles
+   ================================= */
+
+[data-theme="business"] {
+  background-color: var(--color-background);
+  color: var(--color-text);
+  font-family: var(--font-family);
+  font-weight: var(--font-weight-body);
+}
+
+/* =================================
+   12-Column Grid System - Requirement 3.3
+   ================================= */
+
+[data-theme="business"] .business-grid {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: var(--card-gap);
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+[data-theme="business"] .business-col-1 { grid-column: span 1; }
+[data-theme="business"] .business-col-2 { grid-column: span 2; }
+[data-theme="business"] .business-col-3 { grid-column: span 3; }
+[data-theme="business"] .business-col-4 { grid-column: span 4; }
+[data-theme="business"] .business-col-5 { grid-column: span 5; }
+[data-theme="business"] .business-col-6 { grid-column: span 6; }
+[data-theme="business"] .business-col-7 { grid-column: span 7; }
+[data-theme="business"] .business-col-8 { grid-column: span 8; }
+[data-theme="business"] .business-col-9 { grid-column: span 9; }
+[data-theme="business"] .business-col-10 { grid-column: span 10; }
+[data-theme="business"] .business-col-11 { grid-column: span 11; }
+[data-theme="business"] .business-col-12 { grid-column: span 12; }
+
+/* =================================
+   Card Styles - Requirement 3.4, 3.6
+   ================================= */
+
+[data-theme="business"] .business-card {
+  background-color: var(--color-surface);
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-md);
+  padding: 1.5rem;
+  transition: all var(--transition-duration) var(--transition-timing);
+}
+
+[data-theme="business"] .business-card-lg {
+  border-radius: var(--border-radius-lg);
+}
+
+/* Minimal Hover Effects - Requirement 3.5 */
+[data-theme="business"] .business-card:hover {
+  filter: brightness(1.02);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-hover);
+}
+
+[data-theme="business"] .business-card-interactive {
+  cursor: pointer;
+}
+
+[data-theme="business"] .business-card-interactive:hover {
+  filter: brightness(1.05);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-lg);
+}
+
+/* =================================
+   Typography
+   ================================= */
+
+[data-theme="business"] h1,
+[data-theme="business"] h2,
+[data-theme="business"] h3,
+[data-theme="business"] h4,
+[data-theme="business"] h5,
+[data-theme="business"] h6 {
+  font-weight: var(--font-weight-heading);
+  color: var(--color-text);
+  line-height: 1.2;
+}
+
+[data-theme="business"] p {
+  font-weight: var(--font-weight-body);
+  color: var(--color-text);
+  line-height: 1.6;
+}
+
+[data-theme="business"] .business-text-secondary {
+  color: var(--color-text-secondary);
+}
+
+[data-theme="business"] .business-text-medium {
+  font-weight: var(--font-weight-medium);
+}
+
+/* =================================
+   Button Styles
+   ================================= */
+
+[data-theme="business"] .business-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem 1.5rem;
+  border-radius: var(--border-radius);
+  font-weight: var(--font-weight-medium);
+  font-family: var(--font-family);
+  transition: all var(--transition-duration) var(--transition-timing);
+  cursor: pointer;
+  border: none;
+}
+
+[data-theme="business"] .business-button-primary {
+  background-color: var(--color-accent);
+  color: white;
+}
+
+[data-theme="business"] .business-button-primary:hover {
+  filter: brightness(1.1);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+[data-theme="business"] .business-button-secondary {
+  background-color: var(--color-secondary);
+  color: white;
+}
+
+[data-theme="business"] .business-button-secondary:hover {
+  filter: brightness(1.1);
+  transform: translateY(-1px);
+}
+
+[data-theme="business"] .business-button-outline {
+  background-color: transparent;
+  border: 2px solid var(--color-accent);
+  color: var(--color-accent);
+}
+
+[data-theme="business"] .business-button-outline:hover {
+  background-color: var(--color-accent);
+  color: white;
+  filter: brightness(1.05);
+}
+
+/* =================================
+   Feature Cards
+   ================================= */
+
+[data-theme="business"] .business-feature-card {
+  background-color: var(--color-surface);
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow-md);
+  padding: 2rem;
+  transition: all var(--transition-duration) var(--transition-timing);
+}
+
+[data-theme="business"] .business-feature-card:hover {
+  filter: brightness(1.02);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-lg);
+}
+
+[data-theme="business"] .business-feature-icon {
+  width: 3rem;
+  height: 3rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--border-radius);
+  background-color: rgba(59, 130, 246, 0.1);
+  color: var(--color-accent);
+  margin-bottom: 1rem;
+  transition: all var(--transition-duration) var(--transition-timing);
+}
+
+[data-theme="business"] .business-feature-card:hover .business-feature-icon {
+  filter: brightness(1.1);
+}
+
+/* =================================
+   Header Styles
+   ================================= */
+
+[data-theme="business"] .business-header {
+  background-color: var(--color-surface);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  box-shadow: var(--shadow-sm);
+}
+
+[data-theme="business"] .business-nav-link {
+  color: var(--color-text);
+  font-weight: var(--font-weight-medium);
+  transition: color var(--transition-duration) var(--transition-timing);
+  text-decoration: none;
+  padding: 0.5rem 1rem;
+}
+
+[data-theme="business"] .business-nav-link:hover {
+  color: var(--color-accent);
+}
+
+/* =================================
+   Hero Section
+   ================================= */
+
+[data-theme="business"] .business-hero {
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
+  color: white;
+  padding: 4rem 0;
+}
+
+[data-theme="business"] .business-hero-title {
+  font-size: 3rem;
+  font-weight: var(--font-weight-heading);
+  margin-bottom: 1.5rem;
+  line-height: 1.2;
+}
+
+[data-theme="business"] .business-hero-subtitle {
+  font-size: 1.25rem;
+  font-weight: var(--font-weight-body);
+  opacity: 0.9;
+  margin-bottom: 2rem;
+}
+
+/* =================================
+   Section Styles
+   ================================= */
+
+[data-theme="business"] .business-section {
+  padding: 4rem 0;
+}
+
+[data-theme="business"] .business-section-title {
+  font-size: 2.5rem;
+  font-weight: var(--font-weight-heading);
+  color: var(--color-text);
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+[data-theme="business"] .business-section-subtitle {
+  font-size: 1.125rem;
+  color: var(--color-text-secondary);
+  margin-bottom: 3rem;
+  text-align: center;
+}
+
+/* =================================
+   Footer Styles
+   ================================= */
+
+[data-theme="business"] .business-footer {
+  background-color: var(--color-primary);
+  color: white;
+  padding: 3rem 0 1.5rem;
+}
+
+[data-theme="business"] .business-footer-link {
+  color: rgba(255, 255, 255, 0.8);
+  transition: color var(--transition-duration) var(--transition-timing);
+  text-decoration: none;
+}
+
+[data-theme="business"] .business-footer-link:hover {
+  color: white;
+}
+
+/* =================================
+   Skeleton Screen Styles - Requirement 3.7
+   ================================= */
+
+[data-theme="business"] .business-skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--color-background) 0%,
+    #E2E8F0 50%,
+    var(--color-background) 100%
+  );
+  background-size: 200% 100%;
+  animation: businessSkeletonLoading 1.5s ease-in-out infinite;
+  border-radius: var(--border-radius);
+}
+
+@keyframes businessSkeletonLoading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+[data-theme="business"] .business-skeleton-text {
+  height: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+[data-theme="business"] .business-skeleton-title {
+  height: 2rem;
+  width: 60%;
+  margin-bottom: 1rem;
+}
+
+[data-theme="business"] .business-skeleton-card {
+  height: 200px;
+  border-radius: var(--border-radius-lg);
+}
+
+[data-theme="business"] .business-skeleton-circle {
+  width: 3rem;
+  height: 3rem;
+  border-radius: 50%;
+}
+
+/* =================================
+   Utility Classes
+   ================================= */
+
+[data-theme="business"] .business-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+[data-theme="business"] .business-text-center {
+  text-align: center;
+}
+
+[data-theme="business"] .business-flex {
+  display: flex;
+}
+
+[data-theme="business"] .business-flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+[data-theme="business"] .business-gap-sm {
+  gap: 0.5rem;
+}
+
+[data-theme="business"] .business-gap-md {
+  gap: 1rem;
+}
+
+[data-theme="business"] .business-gap-lg {
+  gap: var(--card-gap);
+}
+
+/* =================================
+   Responsive Design
+   ================================= */
+
+@media (max-width: 1024px) {
+  [data-theme="business"] .business-grid {
+    grid-template-columns: repeat(8, 1fr);
+  }
+  
+  [data-theme="business"] .business-hero-title {
+    font-size: 2.5rem;
+  }
+  
+  [data-theme="business"] .business-section-title {
+    font-size: 2rem;
+  }
+}
+
+@media (max-width: 768px) {
+  [data-theme="business"] .business-grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+  }
+  
+  [data-theme="business"] .business-hero-title {
+    font-size: 2rem;
+  }
+  
+  [data-theme="business"] .business-section-title {
+    font-size: 1.75rem;
+  }
+  
+  [data-theme="business"] .business-card,
+  [data-theme="business"] .business-feature-card {
+    padding: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  [data-theme="business"] .business-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  [data-theme="business"] .business-hero-title {
+    font-size: 1.75rem;
+  }
+  
+  [data-theme="business"] .business-section-title {
+    font-size: 1.5rem;
+  }
+}

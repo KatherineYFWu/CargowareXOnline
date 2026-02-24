@@ -372,7 +372,7 @@ const AiCustomerAcquisition: React.FC = () => {
     }
     
     // 设置主题到表单中
-    setEmailSubject(subject);
+    setGeneratedSubject(subject);
     
     // 显示成功提示
     Message.success('主题生成成功！');
@@ -1337,7 +1337,7 @@ XYZ贸易公司,李四,13900139000,lisi@xyz.com,美国,进出口贸易,电子产
             onChange={handleUploadChange}
             beforeUpload={handleFileUpload}
             accept=".xls,.xlsx,.csv,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,text/csv"
-            itemRender={(originNode, file, fileList, actions) => {
+            renderUploadItem={(originNode, file, fileList) => {
               return (
                 <div className="flex items-center justify-between p-3 bg-gray-50 rounded mb-2">
                   <div className="flex items-center">
@@ -1399,7 +1399,10 @@ XYZ贸易公司,李四,13900139000,lisi@xyz.com,美国,进出口贸易,电子产
                       <Button 
                         type="text" 
                         size="small" 
-                        onClick={actions.remove}
+                        onClick={() => {
+                          // 创建一个actions对象来模拟原来的行为
+                          setFileList(prevFileList => prevFileList.filter(item => item.uid !== file.uid));
+                        }}
                         className="ml-2"
                       >
                         删除

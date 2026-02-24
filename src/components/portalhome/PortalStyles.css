@@ -1066,6 +1066,54 @@
   transition: color 0.3s ease, background-color 0.3s ease, border-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
 }
 
+/* =================================
+   Theme Transition Effects
+   Requirements: 10.1, 10.2, 10.3, 10.4, 10.5
+   ================================= */
+
+/* Theme transition class applied during theme changes */
+.theme-transitioning {
+  /* Smooth transitions for color and layout changes (300-500ms) */
+  /* Requirement: 10.1, 10.2 - Apply transition effects within 300-500ms */
+  transition: 
+    background-color 400ms ease-in-out,
+    color 400ms ease-in-out,
+    border-color 400ms ease-in-out,
+    box-shadow 400ms ease-in-out,
+    opacity 400ms ease-in-out !important;
+}
+
+/* Block user interactions during transition */
+/* Requirement: 10.4 - Prevent user interaction during transition period */
+.theme-transitioning * {
+  pointer-events: none !important;
+  user-select: none !important;
+}
+
+/* Ensure smooth transitions for all themed elements */
+[data-theme] {
+  transition: 
+    background-color 400ms ease-in-out,
+    color 400ms ease-in-out,
+    border-color 400ms ease-in-out;
+}
+
+/* Smooth transitions for child elements */
+[data-theme] * {
+  transition: 
+    background-color 400ms ease-in-out,
+    color 400ms ease-in-out,
+    border-color 400ms ease-in-out,
+    box-shadow 400ms ease-in-out;
+}
+
+/* Prevent animations from running during initial theme load */
+/* Requirement: 10.3 - Initialize animations after base theme is applied */
+.theme-loading * {
+  animation: none !important;
+  transition: none !important;
+}
+
 /* 表单验证样式 */
 .arco-form-item-error .arco-input {
   border-color: #ef4444 !important;

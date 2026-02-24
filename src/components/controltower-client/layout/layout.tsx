@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Layout, Menu, Button, Avatar, Breadcrumb, Dropdown, Divider, AutoComplete } from '@arco-design/web-react';
+import { Layout, Menu, Button, Avatar, Breadcrumb, Dropdown, Divider, AutoComplete, Badge } from '@arco-design/web-react';
 import { 
   IconDashboard, 
   IconList, 
@@ -12,7 +12,8 @@ import {
   IconSettings as IconSettingsOutline, 
   IconLanguage, 
   IconQuestionCircle,
-  IconFile
+  IconFile,
+  IconNotification
 } from '@arco-design/web-react/icon';
 
 // faShip 导入已暂时注释，因为运价中心菜单被注释了
@@ -21,6 +22,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import '../ControlTowerClientStyles.css';
 import AIAssistant from './ai-client';
 import AIFullscreen from './AIFullscreen';
+import MessageCenter, { generateMockMessages, MessageItem } from '../../controltower/layout/MessageCenter';
 
 const { Header, Sider, Content } = Layout;
 const MenuItem = Menu.Item;
@@ -39,9 +41,50 @@ const ControlTowerClientLayout: React.FC<LayoutProps> = ({ children }) => {
   const [collapsed, setCollapsed] = useState(false);
   const [aiChatVisible, setAiChatVisible] = useState(false);
   const [aiFullscreenVisible, setAiFullscreenVisible] = useState(false);
+  const [messageCenterVisible, setMessageCenterVisible] = useState(false);
+  const [messages, setMessages] = useState<MessageItem[]>(generateMockMessages());
   const [searchValue, setSearchValue] = useState('');
+  const [unreadCount, setUnreadCount] = useState(0);
   const navigate = useNavigate();
   const location = useLocation();
+
+  // 监听询价未读状态
+  React.useEffect(() => {
+    // 演示初始化：如果没有任何记录，默认设为有未读
+    if (localStorage.getItem('inquiry_unread_count') === null) {
+      console.log('ControlTowerClientLayout: Initializing demo unread count to 5');
+      localStorage.setItem('inquiry_unread_count', '5');
+    }
+
+    const checkUnread = () => {
+      const count = parseInt(localStorage.getItem('inquiry_unread_count') || '0', 10);
+      console.log('ControlTowerClientLayout: Checking unread count from localStorage:', count);
+      setUnreadCount(count);
+    };
+
+    // 初始化检查
+    checkUnread();
+
+    // 监听自定义事件（同页签通信）
+    const handleCustomEvent = () => {
+      console.log('ControlTowerClientLayout: Received INQUIRY_UNREAD_UPDATE event');
+      checkUnread();
+    };
+    window.addEventListener('INQUIRY_UNREAD_UPDATE', handleCustomEvent);
+
+    // 监听 storage 事件（跨页签通信）
+    const handleStorage = (e: StorageEvent) => {
+      if (e.key === 'inquiry_unread_count') {
+        checkUnread();
+      }
+    };
+    window.addEventListener('storage', handleStorage);
+
+    return () => {
+      window.removeEventListener('INQUIRY_UNREAD_UPDATE', handleCustomEvent);
+      window.removeEventListener('storage', handleStorage);
+    };
+  }, []);
 
   // 处理锚点导航
   React.useEffect(() => {
@@ -390,16 +433,33 @@ const ControlTowerClientLayout: React.FC<LayoutProps> = ({ children }) => {
           <SubMenu
             key="super-freight"
             title={
-              <span>
-                <IconFile />
-                <span>超级运价</span>
-              </span>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <div style={{ display: 'flex', alignItems: 'center' }}>
+                  <IconFile />
+                  <span style={{ marginLeft: 10 }}>超级运价</span>
+                </div>
+                {unreadCount > 0 && (
+                  <div className="premium-badge animate" style={{ marginRight: 24 }}>
+                    {unreadCount > 99 ? '99+' : unreadCount}
+                  </div>
+                )}
+              </div>
             }
           >
             {/* 保留运价查询，直接作为超级运价的子菜单 */}
             <MenuItem key="saas/rate-query">运价查询</MenuItem>
+            
             {/* 询价管理上提一级 */}
-            <MenuItem key="saas/inquiry-management">询价管理</MenuItem>
+            <MenuItem key="saas/inquiry-management">
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <span>询价管理</span>
+                {unreadCount > 0 && (
+                  <div className="premium-badge animate">
+                    {unreadCount > 99 ? '99+' : unreadCount}
+                  </div>
+                )}
+              </div>
+            </MenuItem>
           </SubMenu>
           
           {/* 原有控制塔菜单 */}
@@ -501,6 +561,17 @@ const ControlTowerClientLayout: React.FC<LayoutProps> = ({ children }) => {
               allowClear
               filterOption={false}
             />
+            
+            {/* 消息中心按钮 */}
+            <Badge count={messages.filter(m => !m.read).length} offset={[-8, 8]} maxCount={99}>
+              <Button 
+                type="text" 
+                icon={<IconNotification />} 
+                style={{ margin: '0 8px' }}
+                onClick={() => setMessageCenterVisible(true)}
+              />
+            </Badge>
+
             <Dropdown
               droplist={
                 <Menu>
@@ -551,6 +622,12 @@ const ControlTowerClientLayout: React.FC<LayoutProps> = ({ children }) => {
           setAiFullscreenVisible(false);
           setAiChatVisible(true);
         }}
+      />
+      <MessageCenter 
+        visible={messageCenterVisible} 
+        onCancel={() => setMessageCenterVisible(false)} 
+        messages={messages}
+        onMessagesChange={setMessages}
       />
     </Layout>
   );

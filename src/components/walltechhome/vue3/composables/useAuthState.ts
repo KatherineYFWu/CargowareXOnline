@@ -1,9 +1,9 @@
 // @ts-ignore
 import { ref, computed } from 'vue'
 
-// 表单数据接口
+// Form data interfaces
 export interface LoginFormData {
-  account: string // 邮箱或手机号
+  account: string // Email or phone number
   password?: string
   code?: string
 }
@@ -17,24 +17,24 @@ export interface RegisterFormData {
   phoneCode: string
 }
 
-// 创建认证状态管理
+// Create authentication state management
 export const useAuthState = () => {
-  // 基础状态
+  // Basic states
   const isLogin = ref(true)
   const loading = ref(false)
   const loginType = ref<'password' | 'code'>('password')
   const countdown = ref(0)
   const mounted = ref(false)
   
-  // 密码可见性
+  // Password visibility
   const passwordVisible = ref(false)
   const confirmPasswordVisible = ref(false)
   
-  // 弹窗状态
+  // Modal states
   const userAgreementVisible = ref(false)
   const privacyPolicyVisible = ref(false)
   
-  // 表单数据
+  // Form data
   const loginForm = ref<LoginFormData>({
     account: '',
     password: '',
@@ -50,17 +50,17 @@ export const useAuthState = () => {
     phoneCode: ''
   })
   
-  // 切换登录/注册
+  // Toggle login/register
   const toggleAuthMode = () => {
     isLogin.value = !isLogin.value
   }
   
-  // 切换登录方式
+  // Toggle login method
   const setLoginType = (type: 'password' | 'code') => {
     loginType.value = type
   }
   
-  // 切换密码可见性
+  // Toggle password visibility
   const togglePasswordVisible = () => {
     passwordVisible.value = !passwordVisible.value
   }
@@ -69,7 +69,7 @@ export const useAuthState = () => {
     confirmPasswordVisible.value = !confirmPasswordVisible.value
   }
   
-  // 开始倒计时
+  // Start countdown
   const startCountdown = () => {
     if (countdown.value > 0) return
     
@@ -82,7 +82,7 @@ export const useAuthState = () => {
     }, 1000)
   }
   
-  // 重置表单
+  // Reset forms
   const resetForms = () => {
     loginForm.value = {
       account: '',
@@ -100,7 +100,7 @@ export const useAuthState = () => {
   }
   
   return {
-    // 状态
+    // States
     isLogin,
     loading,
     loginType,
@@ -113,7 +113,7 @@ export const useAuthState = () => {
     loginForm,
     registerForm,
     
-    // 方法
+    // Methods
     toggleAuthMode,
     setLoginType,
     togglePasswordVisible,
@@ -121,4 +121,4 @@ export const useAuthState = () => {
     startCountdown,
     resetForms
   }
-} 
+}

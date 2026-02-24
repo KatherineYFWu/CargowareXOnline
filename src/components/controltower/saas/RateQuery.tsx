@@ -10,6 +10,7 @@ import {
   Tag,
   Modal,
   Message,
+  Notification,
   Switch,
   Tooltip,
   Tabs,
@@ -19,7 +20,9 @@ import {
   Typography,
   Pagination,
   Radio,
-  Checkbox
+  Checkbox,
+  Popover,
+  Empty
 } from '@arco-design/web-react';
 import { 
   IconSearch, 
@@ -30,6 +33,11 @@ import {
   IconDown,
   IconUp,
   IconSettings,
+  IconPushpin,
+  IconNav,
+  IconLocation,
+  IconTrophy,
+  IconRobot,
   // IconFilter,
   // IconSort,
   // IconMore
@@ -41,6 +49,8 @@ import SchemeManagementModal, { SchemeData } from './SchemeManagementModal';
 import BatchQuoteModal from './BatchQuoteModal';
 import SailingScheduleModal from './SailingScheduleModal';
 import RateTrendModal from './RateTrendModal';
+import RateDetailModal from './RateDetailModal';
+import SearchProgress, { CarrierProgress } from './SearchProgress';
 import './InquiryManagement.css';
 
 const Option = Select.Option;
@@ -49,6 +59,41 @@ const TabPane = Tabs.TabPane;
 const Row = Grid.Row;
 const Col = Grid.Col;
 const Title = Typography.Title;
+
+import { PortsOfCallPopover, PortOfCall } from './PortsOfCallPopover';
+
+// 预定义选项常量
+const BOX_TYPE_OPTIONS = [
+  { label: '20GP', value: '20GP' },
+  { label: '40GP', value: '40GP' },
+  { label: '40HC', value: '40HC' },
+  { label: '20NOR', value: '20NOR' },
+  { label: '40NOR', value: '40NOR' },
+  { label: '45HC', value: '45HC' },
+  { label: '20HC', value: '20HC' },
+  { label: '20TK', value: '20TK' },
+  { label: '40TK', value: '40TK' },
+  { label: '20OT', value: '20OT' },
+  { label: '40OT', value: '40OT' },
+  { label: '20FR', value: '20FR' },
+  { label: '40FR', value: '40FR' }
+];
+
+const SHIPPING_COMPANY_OPTIONS = [
+  { label: 'CNC', value: 'CNC' },
+  { label: 'ZIN', value: 'ZIN' },
+  { label: 'MAERSK', value: 'MAERSK' },
+  { label: 'OOCL', value: 'OOCL' },
+  { label: 'HPL_SPOT', value: 'HPL_SPOT' },
+  { label: 'EMC', value: 'EMC' },
+  { label: 'ZIM', value: 'ZIM' },
+  { label: 'CMA', value: 'CMA' },
+  { label: 'COSCO', value: 'COSCO' },
+  { label: 'HPL_QQ', value: 'HPL_QQ' },
+  { label: 'MSC', value: 'MSC' },
+  { label: 'ONE', value: 'ONE' },
+  { label: 'HMM', value: 'HMM' }
+];
 
 // 筛选模式枚举
 export enum FilterMode {
@@ -80,6 +125,7 @@ export interface FilterFieldConfig {
   options?: { label: string; value: string }[];
   placeholder?: string;
   width?: number;
+  mode?: 'multiple';
 }
 
 // 筛选条件值接口
@@ -101,6 +147,173 @@ export interface FilterScheme {
 // 根据不同Tab定义不同的筛选字段配置
 const getFilterFieldsByTab = (activeTab: string): FilterFieldConfig[] => {
   switch (activeTab) {
+    case 'ecommerce':
+      return [
+        {
+          key: 'pol',
+          label: '起运港',
+          type: 'select',
+          options: [
+            { label: '洋山 Shanghai (CNSHA)', value: 'SHANGHAI' },
+            { label: '舟山 Ningbo (CNNGB)', value: 'NINGBO' },
+            { label: '盐田 Shenzhen (CNSZX)', value: 'SHENZHEN' },
+            { label: '青岛港 Qingdao (CNQIN)', value: 'QINGDAO' },
+            { label: '新加坡港 Singapore (SGSIN)', value: 'SINGAPORE' },
+            { label: '汉堡港 Hamburg (DEHAM)', value: 'HAMBURG' },
+            { label: '鹿特丹港 Rotterdam (NLRTM)', value: 'ROTTERDAM' },
+            { label: '洛杉矶港 Los Angeles (USLAX)', value: 'LOS ANGELES' },
+            { label: '奥克兰港 Oakland (USOAK)', value: 'OAKLAND' },
+            { label: '费力克斯托港 Felixstowe (GBFXT)', value: 'FELIXSTOWE' }
+          ],
+          placeholder: '请输入或选择起运港'
+        },
+        {
+          key: 'pod',
+          label: '目的港',
+          type: 'select',
+          options: [
+            { label: '鹿特丹港 Rotterdam (NLRTM)', value: 'ROTTERDAM' },
+            { label: '汉堡港 Hamburg (DEHAM)', value: 'HAMBURG' },
+            { label: '洛杉矶港 Los Angeles (USLAX)', value: 'LOS ANGELES' },
+            { label: '纽约港 New York (USNYC)', value: 'NEW YORK' },
+            { label: '洋山 Shanghai (CNSHA)', value: 'SHANGHAI' },
+            { label: '舟山 Ningbo (CNNGB)', value: 'NINGBO' },
+            { label: '盐田 Shenzhen (CNSZX)', value: 'SHENZHEN' },
+            { label: '青岛港 Qingdao (CNQIN)', value: 'QINGDAO' },
+            { label: '新加坡港 Singapore (SGSIN)', value: 'SINGAPORE' },
+            { label: '奥克兰港 Oakland (USOAK)', value: 'OAKLAND' }
+          ],
+          placeholder: '请输入或选择目的港'
+        },
+        {
+          key: 'boxType',
+          label: '箱型',
+          type: 'select',
+          mode: 'multiple',
+          options: BOX_TYPE_OPTIONS,
+          placeholder: '请选择箱型'
+        },
+        {
+          key: 'carrier',
+          label: '船公司',
+          type: 'select',
+          mode: 'multiple',
+          options: SHIPPING_COMPANY_OPTIONS,
+          placeholder: '请选择船公司'
+        },
+        {
+          key: 'transitType',
+          label: '中转/直达',
+          type: 'select',
+          options: [
+            { label: '直达', value: '直达' },
+            { label: '中转', value: '中转' }
+          ],
+          placeholder: '请选择中转/直达'
+        },
+        {
+          key: 'cargoType',
+          label: '货物类型',
+          type: 'select',
+          options: [
+            { label: '普货', value: '普货' },
+            { label: '危险品', value: '危险品' },
+            { label: '冷冻品', value: '冷冻品' },
+            { label: '特种箱', value: '特种箱' },
+            { label: '卷钢', value: '卷钢' },
+            { label: '液体', value: '液体' },
+            { label: '化工品', value: '化工品' },
+            { label: '纺织品', value: '纺织品' }
+          ],
+          placeholder: '请选择货物类型'
+        },
+        {
+          key: 'transitTime',
+          label: '航程',
+          type: 'number',
+          placeholder: '请输入航程'
+        },
+        {
+          key: 'spaceStatus',
+          label: '舱位状态',
+          type: 'select',
+          options: [
+            { label: '现舱', value: '现舱' },
+            { label: '满舱', value: '满舱' }
+          ],
+          placeholder: '请选择舱位状态'
+        },
+        {
+          key: 'totalPrice',
+          label: '总运价',
+          type: 'number',
+          placeholder: '请输入总运价'
+        },
+        {
+          key: 'totalCurrency',
+          label: '总价币种',
+          type: 'select',
+          options: [
+            { label: 'USD', value: 'USD' },
+            { label: 'EUR', value: 'EUR' },
+            { label: 'CNY', value: 'CNY' }
+          ],
+          placeholder: '请选择总价币种'
+        },
+        {
+          key: 'basePrice',
+          label: '基础运费',
+          type: 'number',
+          placeholder: '请输入基础运费'
+        },
+        {
+          key: 'baseCurrency',
+          label: '基价币种',
+          type: 'select',
+          options: [
+            { label: 'USD', value: 'USD' },
+            { label: 'EUR', value: 'EUR' },
+            { label: 'CNY', value: 'CNY' }
+          ],
+          placeholder: '请选择基价币种'
+        },
+        {
+          key: 'vesselName',
+          label: '船名',
+          type: 'text',
+          placeholder: '请输入船名'
+        },
+        {
+          key: 'voyageNo',
+          label: '航次',
+          type: 'text',
+          placeholder: '请输入航次'
+        },
+        {
+          key: 'lineCode',
+          label: '航线代码',
+          type: 'text',
+          placeholder: '请输入航线代码'
+        },
+        {
+          key: 'updateTime',
+          label: '更新时间',
+          type: 'dateRange',
+          placeholder: '请选择更新时间范围'
+        },
+        {
+          key: 'validFrom',
+          label: '有效起始日期',
+          type: 'dateRange',
+          placeholder: '请选择有效起始日期范围'
+        },
+        {
+          key: 'validTo',
+          label: '有效结束日期',
+          type: 'dateRange',
+          placeholder: '请选择有效结束日期范围'
+        }
+      ];
     case 'fcl':
     case 'lcl':
     case 'air':
@@ -180,14 +393,8 @@ const getFilterFieldsByTab = (activeTab: string): FilterFieldConfig[] => {
           key: 'shipCompany',
           label: '船公司',
           type: 'select',
-          options: [
-            { label: 'SITC', value: 'SITC' },
-            { label: 'COSCO', value: 'COSCO' },
-            { label: 'MSK', value: 'MSK' },
-            { label: 'ONE', value: 'ONE' },
-            { label: 'MAERSK', value: 'MAERSK' },
-            { label: 'EVERGREEN', value: 'EVERGREEN' }
-          ],
+          mode: 'multiple',
+          options: SHIPPING_COMPANY_OPTIONS,
           placeholder: '请选择船公司'
         },
         {
@@ -724,12 +931,708 @@ interface LclAirDataItem {
   remark: string;
 }
 
+// 电商运价数据接口
+interface EcommerceRateItem {
+  key: string;
+  id: string; // 费用ID
+  carrierLogo: string; // 承运人Logo
+  carrierName: string; // 承运人名称
+  pol: string; // 起运港
+  pod: string; // 目的港
+  etd: string; // 离港日期
+  eta: string; // 到港日期
+  transitType: string; // 中转状况 (直达/中转)
+  cargoType: string; // 货物类型
+  transitTime: number; // 航程 (天)
+  containerType: string; // 箱型
+  spaceStatus: string; // 舱位状态 (现舱/满舱)
+  totalPrice: number; // 总运价
+  totalCurrency: string; // 总价币种
+  basePrice: number; // 基础运费
+  baseCurrency: string; // 基价币种
+  vesselName: string; // 船名
+  voyageNo: string; // 航次
+  routeCode?: string; // 航线代码
+  updateTime: string; // 更新时间
+  validFrom: string; // 有效起始日期
+  validTo: string; // 有效结束日期
+  transportTerms: string; // 运输条款
+  lane?: string; // 航线
+  transitPorts?: string[]; // 中转港
+  portsOfCall?: PortOfCall[]; // 挂靠港信息
+  '20gp'?: number;
+  '40gp'?: number;
+  '40hc'?: number;
+  '20nor'?: number;
+  '40nor'?: number;
+  '45hc'?: number;
+  '20hc'?: number;
+  '20tk'?: number;
+  '40tk'?: number;
+  '20ot'?: number;
+  '40ot'?: number;
+  '20fr'?: number;
+  '40fr'?: number;
+  surchargeLabel?: string;
+  surchargeAmount?: number;
+  cutoffDate?: string;
+}
+
+// 电商运价模拟数据
+// 辅助函数：生成动态时间
+const getMockTime = (hoursAgo: number) => {
+  const date = new Date();
+  date.setTime(date.getTime() - hoursAgo * 60 * 60 * 1000);
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
+};
+
+// 电商运价模拟数据
+const ecommerceData: EcommerceRateItem[] = [
+  {
+    key: '1',
+    id: 'EC20240115001',
+    carrierLogo: '/assets/carrier/EMC.png',
+    carrierName: 'EMC',
+    pol: 'SHANGHAI',
+    pod: 'ROTTERDAM',
+    etd: '2026-01-18',
+    eta: '2026-02-17',
+    transitType: '直达',
+    cargoType: '普货',
+    transitTime: 30,
+    containerType: '40HC',
+    spaceStatus: '现舱',
+    totalPrice: 3130,
+    totalCurrency: 'USD',
+    basePrice: 2984,
+    baseCurrency: 'USD',
+    vesselName: 'COSCO SHIPPING LIBRA',
+    voyageNo: '034W',
+    routeCode: 'NE3',
+    updateTime: getMockTime(1), // 1小时前 - 极鲜
+    validFrom: '2026-01-15',
+    validTo: '2026-01-31',
+    transportTerms: 'CY-CY',
+    lane: 'Europe Line',
+    transitPorts: [],
+    portsOfCall: [
+      { portInfo: 'Shanghai China (CN)', terminal: 'Yangshan Phase IV', arrivalDay: '星期六', departureDay: '星期日' },
+      { portInfo: 'Ningbo China (CN)', terminal: 'Meishan Terminal', arrivalDay: '星期一', departureDay: '星期二' },
+      { portInfo: 'Yantian China (CN)', terminal: 'YICT', arrivalDay: '星期四', departureDay: '星期五' },
+      { portInfo: 'Singapore Singapore (SG)', terminal: 'PSA Singapore', arrivalDay: '星期二', departureDay: '星期三' },
+      { portInfo: 'Rotterdam Netherlands (NL)', terminal: 'ECT Delta', arrivalDay: '星期二', departureDay: '星期三' },
+      { portInfo: 'Hamburg Germany (DE)', terminal: 'HHLA CTA', arrivalDay: '星期五', departureDay: '星期六' },
+      { portInfo: 'Antwerp Belgium (BE)', terminal: 'Antwerp Gateway', arrivalDay: '星期一', departureDay: '星期二' }
+    ],
+    '20gp': 1500,
+    '40gp': 2800,
+    '40hc': 3130,
+    '45hc': 3500
+  },
+  {
+    key: '2',
+    id: 'EC20240115002',
+    carrierLogo: '/assets/carrier/COSCO.png',
+    carrierName: 'COSCO',
+    pol: 'NINGBO',
+    pod: 'HAMBURG',
+    etd: '2026-01-20',
+    eta: '2026-02-22',
+    transitType: '中转',
+    cargoType: '普货',
+    transitTime: 33,
+    containerType: '20GP',
+    spaceStatus: '满舱',
+    totalPrice: 1850,
+    totalCurrency: 'USD',
+    basePrice: 1650,
+    baseCurrency: 'USD',
+    vesselName: 'COSCO SHIPPING SCORPIO',
+    voyageNo: '022W',
+    routeCode: 'AWE2',
+    updateTime: getMockTime(4), // 4小时前 - 新鲜
+    validFrom: '2026-01-15',
+    validTo: '2026-01-31',
+    transportTerms: 'CY-CY',
+    transitPorts: ['SINGAPORE', 'ROTTERDAM'],
+    portsOfCall: [
+      { portInfo: 'Ningbo China (CN)', terminal: 'Meishan Terminal', arrivalDay: '星期一', departureDay: '星期二' },
+      { portInfo: 'Shanghai China (CN)', terminal: 'Yangshan Phase IV', arrivalDay: '星期三', departureDay: '星期四' },
+      { portInfo: 'Xiamen China (CN)', terminal: 'Hairun Terminal', arrivalDay: '星期六', departureDay: '星期日' },
+      { portInfo: 'Singapore Singapore (SG)', terminal: 'Pasir Panjang', arrivalDay: '星期四', departureDay: '星期五' },
+      { portInfo: 'Suez Canal Egypt (EG)', terminal: '-', arrivalDay: '星期一', departureDay: '星期一' },
+      { portInfo: 'Hamburg Germany (DE)', terminal: 'HHLA CTA', arrivalDay: '星期四', departureDay: '星期五' },
+      { portInfo: 'Rotterdam Netherlands (NL)', terminal: 'RWG', arrivalDay: '星期日', departureDay: '星期一' }
+    ],
+    surchargeLabel: 'AMS',
+    surchargeAmount: 30,
+    cutoffDate: '2026-01-18'
+  },
+  {
+    key: '3',
+    id: 'EC20240115003',
+    carrierLogo: '/assets/carrier/MSK.png',
+    carrierName: 'MAERSK',
+    pol: 'SHENZHEN',
+    pod: 'LOS ANGELES',
+    etd: '2026-01-25',
+    eta: '2026-02-10',
+    transitType: '直达',
+    cargoType: '普货',
+    transitTime: 16,
+    containerType: '40HC',
+    spaceStatus: '现舱',
+    totalPrice: 2800,
+    totalCurrency: 'USD',
+    basePrice: 2600,
+    baseCurrency: 'USD',
+    vesselName: 'MAERSK EUREKA',
+    voyageNo: '105E',
+    routeCode: 'TP6',
+    updateTime: getMockTime(9), // 9小时前 - 较新
+    validFrom: '2026-01-15',
+    validTo: '2026-01-31',
+    transportTerms: 'CY-CY',
+    transitPorts: [],
+    portsOfCall: [
+      { portInfo: 'Yantian China (CN)', terminal: 'YICT', arrivalDay: '星期二', departureDay: '星期三' },
+      { portInfo: 'Hong Kong Hong Kong (HK)', terminal: 'HIT', arrivalDay: '星期四', departureDay: '星期四' },
+      { portInfo: 'Nansha China (CN)', terminal: 'Nansha Phase III', arrivalDay: '星期五', departureDay: '星期六' },
+      { portInfo: 'Kaohsiung Taiwan (TW)', terminal: 'Kaohsiung Port', arrivalDay: '星期日', departureDay: '星期一' },
+      { portInfo: 'Los Angeles United States (US)', terminal: 'APM Terminals', arrivalDay: '星期二', departureDay: '星期四' },
+      { portInfo: 'Oakland United States (US)', terminal: 'OICT', arrivalDay: '星期六', departureDay: '星期日' }
+    ]
+  },
+  {
+    key: '4',
+    id: 'EC20240115004',
+    carrierLogo: '/assets/carrier/OOCL.png',
+    carrierName: 'OOCL',
+    pol: 'QINGDAO',
+    pod: 'NEW YORK',
+    etd: '2026-01-28',
+    eta: '2026-02-25',
+    transitType: '直达',
+    cargoType: '普货',
+    transitTime: 28,
+    containerType: '40HC',
+    spaceStatus: '现舱',
+    totalPrice: 4200,
+    totalCurrency: 'USD',
+    basePrice: 3950,
+    baseCurrency: 'USD',
+    vesselName: 'OOCL HONG KONG',
+    voyageNo: '018E',
+    routeCode: 'AEC1',
+    updateTime: getMockTime(18), // 18小时前 - 一天内
+    validFrom: '2026-01-15',
+    validTo: '2026-01-31',
+    transportTerms: 'CY-CY',
+    transitPorts: [],
+    portsOfCall: []
+  },
+  {
+    key: '5',
+    id: 'EC20240115005',
+    carrierLogo: '/assets/carrier/MSC.png',
+    carrierName: 'MSC',
+    pol: 'SHANGHAI',
+    pod: 'FELIXSTOWE',
+    etd: '2026-01-30',
+    eta: '2026-03-05',
+    transitType: '中转',
+    cargoType: '普货',
+    transitTime: 34,
+    containerType: '20GP',
+    spaceStatus: '满舱',
+    totalPrice: 1950,
+    totalCurrency: 'USD',
+    basePrice: 1700,
+    baseCurrency: 'USD',
+    vesselName: 'MSC GULSUN',
+    voyageNo: '404W',
+    routeCode: 'AE55',
+    updateTime: getMockTime(36), // 36小时前 - 两天内
+    validFrom: '2026-01-15',
+    validTo: '2026-01-31',
+    transportTerms: 'CY-CY',
+    transitPorts: ['ANTWERP'],
+    portsOfCall: []
+  },
+  {
+    key: '6',
+    id: 'EC20240115006',
+    carrierLogo: '/assets/carrier/CMA.png',
+    carrierName: 'CMA',
+    pol: 'NINGBO',
+    pod: 'LE HAVRE',
+    etd: '2026-02-02',
+    eta: '2026-03-10',
+    transitType: '直达',
+    cargoType: '普货',
+    transitTime: 36,
+    containerType: '40HC',
+    spaceStatus: '现舱',
+    totalPrice: 3050,
+    totalCurrency: 'USD',
+    basePrice: 2800,
+    baseCurrency: 'USD',
+    vesselName: 'CMA CGM JACQUES SAADE',
+    voyageNo: '0WB',
+    routeCode: 'FAL1',
+    updateTime: getMockTime(72), // 72小时前 - 陈旧
+    validFrom: '2026-01-10',
+    validTo: '2026-01-31',
+    transportTerms: 'CY-CY',
+    transitPorts: [],
+    portsOfCall: []
+  }
+];
+
+
+// 新鲜度配置
+const getFreshnessConfig = (updateTime: string) => {
+  if (!updateTime) return { color: '#86909C', text: '未知', timeDisplay: '未知时间' };
+  
+  const now = new Date();
+  const update = new Date(updateTime);
+  const diffHours = (now.getTime() - update.getTime()) / (1000 * 60 * 60);
+
+  let color = '';
+  let text = '';
+  
+  if (diffHours < 2) {
+    color = '#00B42A'; // green-6
+    text = '极鲜';
+  } else if (diffHours < 6) {
+    color = '#7BC616'; // lime-7
+    text = '新鲜';
+  } else if (diffHours < 12) {
+    color = '#F7BA1E'; // gold-6
+    text = '较新';
+  } else if (diffHours < 24) {
+    color = '#FF7D00'; // orange-6
+    text = '一天内';
+  } else if (diffHours < 48) {
+    color = '#F53F3F'; // red-6
+    text = '两天内';
+  } else {
+    color = '#86909C'; // gray-6
+    text = '陈旧';
+  }
+
+  // 计算显示时间
+  let timeDisplay = '';
+  const diffMinutes = Math.floor((now.getTime() - update.getTime()) / (1000 * 60));
+  if (diffMinutes < 60) {
+    timeDisplay = `${diffMinutes}分钟前更新`;
+  } else if (diffHours < 24) {
+    timeDisplay = `${Math.floor(diffHours)}小时前更新`;
+  } else {
+    timeDisplay = `${Math.floor(diffHours / 24)}天前更新`;
+  }
+
+  return { color, text, timeDisplay };
+};
+
+const ALL_ECOMMERCE_COLUMNS = [
+  { title: '运价ID', dataIndex: 'id', width: 140, sorter: (a: any, b: any) => a.id.localeCompare(b.id) },
+  { title: '运输条款', dataIndex: 'transportTerms', width: 100, sorter: (a: any, b: any) => a.transportTerms.localeCompare(b.transportTerms) },
+  { title: '承运人名称', dataIndex: 'carrierName', width: 120, sorter: (a: any, b: any) => a.carrierName.localeCompare(b.carrierName) },
+  { title: '起运港', dataIndex: 'pol', width: 120, sorter: (a: any, b: any) => a.pol.localeCompare(b.pol) },
+  { title: '目的港', dataIndex: 'pod', width: 120, sorter: (a: any, b: any) => a.pod.localeCompare(b.pod) },
+  { 
+    title: '航线代码', 
+    dataIndex: 'routeCode', 
+    width: 120, 
+    sorter: (a: any, b: any) => (a.routeCode || '').localeCompare(b.routeCode || ''),
+    render: (val: string, record: any) => {
+      const ports = record.portsOfCall || [];
+      return (
+        <PortsOfCallPopover 
+          routeCode={val || '-'} 
+          ports={ports}
+        />
+      );
+    }
+  },
+  { title: 'ETD', dataIndex: 'etd', width: 120, sorter: (a: any, b: any) => a.etd.localeCompare(b.etd) },
+  { title: 'ETA', dataIndex: 'eta', width: 120, sorter: (a: any, b: any) => a.eta.localeCompare(b.eta) },
+  { title: '中转状况', dataIndex: 'transitType', width: 100, sorter: (a: any, b: any) => a.transitType.localeCompare(b.transitType) },
+  { title: '有效起始日期', dataIndex: 'validFrom', width: 120, sorter: (a: any, b: any) => a.validFrom.localeCompare(b.validFrom) },
+  { title: '有效结束日期', dataIndex: 'validTo', width: 120, sorter: (a: any, b: any) => a.validTo.localeCompare(b.validTo) },
+  { title: '舱位状态', dataIndex: 'spaceStatus', width: 100, sorter: (a: any, b: any) => a.spaceStatus.localeCompare(b.spaceStatus), render: (val: string) => <Tag color={val === '现舱' ? 'green' : 'red'}>{val}</Tag> },
+  { title: '货物类型', dataIndex: 'cargoType', width: 100, sorter: (a: any, b: any) => a.cargoType.localeCompare(b.cargoType) },
+  // 箱型价格列 - Base
+  { title: '20GP-Base', dataIndex: '20gp', width: 110, sorter: (a: any, b: any) => (a['20gp'] || 0) - (b['20gp'] || 0), render: (val: number) => <span className="text-red-600 font-bold">{val}</span> },
+  { title: '40GP-Base', dataIndex: '40gp', width: 110, sorter: (a: any, b: any) => (a['40gp'] || 0) - (b['40gp'] || 0), render: (val: number) => <span className="text-red-600 font-bold">{val}</span> },
+  { title: '40HC-Base', dataIndex: '40hc', width: 110, sorter: (a: any, b: any) => (a['40hc'] || 0) - (b['40hc'] || 0), render: (val: number) => <span className="text-red-600 font-bold">{val}</span> },
+  // 箱型价格列 - Total
+  { 
+    title: '20GP-Total', 
+    dataIndex: '20gp-total', 
+    width: 110, 
+    sorter: (a: any, b: any) => {
+      const aTotal = (a['20gp'] || 0) + ((a.totalPrice || 0) - (a.basePrice || 0));
+      const bTotal = (b['20gp'] || 0) + ((b.totalPrice || 0) - (b.basePrice || 0));
+      return aTotal - bTotal;
+    },
+    render: (val: any, record: any) => {
+      const basePrice = record['20gp'] || 0;
+      const diff = (record.totalPrice || 0) - (record.basePrice || 0);
+      const totalPrice = basePrice + (diff > 0 ? diff : 0);
+      return <span className="text-[#1e3a8a] font-bold">{totalPrice}</span>;
+    }
+  },
+  { 
+    title: '40GP-Total', 
+    dataIndex: '40gp-total', 
+    width: 110, 
+    sorter: (a: any, b: any) => {
+      const aTotal = (a['40gp'] || 0) + ((a.totalPrice || 0) - (a.basePrice || 0));
+      const bTotal = (b['40gp'] || 0) + ((b.totalPrice || 0) - (b.basePrice || 0));
+      return aTotal - bTotal;
+    },
+    render: (val: any, record: any) => {
+      const basePrice = record['40gp'] || 0;
+      const diff = (record.totalPrice || 0) - (record.basePrice || 0);
+      const totalPrice = basePrice + (diff > 0 ? diff : 0);
+      return <span className="text-[#1e3a8a] font-bold">{totalPrice}</span>;
+    }
+  },
+  { 
+    title: '40HC-Total', 
+    dataIndex: '40hc-total', 
+    width: 110, 
+    sorter: (a: any, b: any) => {
+      const aTotal = (a['40hc'] || 0) + ((a.totalPrice || 0) - (a.basePrice || 0));
+      const bTotal = (b['40hc'] || 0) + ((b.totalPrice || 0) - (b.basePrice || 0));
+      return aTotal - bTotal;
+    },
+    render: (val: any, record: any) => {
+      const basePrice = record['40hc'] || 0;
+      const diff = (record.totalPrice || 0) - (record.basePrice || 0);
+      const totalPrice = basePrice + (diff > 0 ? diff : 0);
+      return <span className="text-[#1e3a8a] font-bold">{totalPrice}</span>;
+    }
+  },
+  // Non-default
+  { title: '航程', dataIndex: 'transitTime', width: 100, sorter: (a: any, b: any) => a.transitTime - b.transitTime, render: (val: number) => `${val}天` },
+  { title: '总运价', dataIndex: 'totalPrice', width: 120, sorter: (a: any, b: any) => a.totalPrice - b.totalPrice, render: (val: number, record: any) => <span className="text-red-600 font-bold">{record.totalCurrency} {val}</span> },
+  { title: '总价币种', dataIndex: 'totalCurrency', width: 100, sorter: (a: any, b: any) => a.totalCurrency.localeCompare(b.totalCurrency) },
+  { title: '基础运费', dataIndex: 'basePrice', width: 120, sorter: (a: any, b: any) => a.basePrice - b.basePrice },
+  { title: '基价币种', dataIndex: 'baseCurrency', width: 100, sorter: (a: any, b: any) => a.baseCurrency.localeCompare(b.baseCurrency) },
+  { title: '船名', dataIndex: 'vesselName', width: 150, sorter: (a: any, b: any) => a.vesselName.localeCompare(b.vesselName) },
+  { title: '航次', dataIndex: 'voyageNo', width: 100, sorter: (a: any, b: any) => a.voyageNo.localeCompare(b.voyageNo) },
+  { 
+    title: '更新时间', 
+    dataIndex: 'updateTime', 
+    width: 220, 
+    sorter: (a: any, b: any) => a.updateTime.localeCompare(b.updateTime),
+    render: (val: string) => {
+      const { color, text, timeDisplay } = getFreshnessConfig(val);
+      return (
+        <div className="flex items-center">
+          <Tooltip content={timeDisplay}>
+             <Tag color={color} size="small" className="mr-2" style={{ borderColor: 'transparent', minWidth: '48px', textAlign: 'center' }}>{text}</Tag>
+          </Tooltip>
+          <span>{val}</span>
+        </div>
+      );
+    }
+  },
+  { title: '附加费标签', dataIndex: 'surchargeLabel', width: 120, sorter: (a: any, b: any) => (a.surchargeLabel || '').localeCompare(b.surchargeLabel || ''), render: (val: string) => val ? <span className="text-orange-500 font-bold">{val}</span> : '-' },
+  { title: '附加费金额', dataIndex: 'surchargeAmount', width: 120, sorter: (a: any, b: any) => (a.surchargeAmount || 0) - (b.surchargeAmount || 0), render: (val: number) => val ? <span className="text-orange-500 font-bold">{val}</span> : '-' },
+  { title: '截关日期', dataIndex: 'cutoffDate', width: 140, sorter: (a: any, b: any) => (a.cutoffDate || '').localeCompare(b.cutoffDate || '') },
+  // Other containers - Base
+  { title: '45HC-Base', dataIndex: '45hc', width: 110, sorter: (a: any, b: any) => (a['45hc'] || 0) - (b['45hc'] || 0), render: (val: number) => <span className="text-red-600 font-bold">{val || '-'}</span> },
+  { title: '20NOR-Base', dataIndex: '20nor', width: 110, sorter: (a: any, b: any) => (a['20nor'] || 0) - (b['20nor'] || 0), render: (val: number) => <span className="text-red-600 font-bold">{val || '-'}</span> },
+  { title: '40NOR-Base', dataIndex: '40nor', width: 110, sorter: (a: any, b: any) => (a['40nor'] || 0) - (b['40nor'] || 0), render: (val: number) => <span className="text-red-600 font-bold">{val || '-'}</span> },
+  { title: '20HC-Base', dataIndex: '20hc', width: 110, sorter: (a: any, b: any) => (a['20hc'] || 0) - (b['20hc'] || 0), render: (val: number) => <span className="text-red-600 font-bold">{val || '-'}</span> },
+  { title: '20TK-Base', dataIndex: '20tk', width: 110, sorter: (a: any, b: any) => (a['20tk'] || 0) - (b['20tk'] || 0), render: (val: number) => <span className="text-red-600 font-bold">{val || '-'}</span> },
+  { title: '40TK-Base', dataIndex: '40tk', width: 110, sorter: (a: any, b: any) => (a['40tk'] || 0) - (b['40tk'] || 0), render: (val: number) => <span className="text-red-600 font-bold">{val || '-'}</span> },
+  { title: '20OT-Base', dataIndex: '20ot', width: 110, sorter: (a: any, b: any) => (a['20ot'] || 0) - (b['20ot'] || 0), render: (val: number) => <span className="text-red-600 font-bold">{val || '-'}</span> },
+  { title: '40OT-Base', dataIndex: '40ot', width: 110, sorter: (a: any, b: any) => (a['40ot'] || 0) - (b['40ot'] || 0), render: (val: number) => <span className="text-red-600 font-bold">{val || '-'}</span> },
+  { title: '20FR-Base', dataIndex: '20fr', width: 110, sorter: (a: any, b: any) => (a['20fr'] || 0) - (b['20fr'] || 0), render: (val: number) => <span className="text-red-600 font-bold">{val || '-'}</span> },
+  { title: '40FR-Base', dataIndex: '40fr', width: 110, sorter: (a: any, b: any) => (a['40fr'] || 0) - (b['40fr'] || 0), render: (val: number) => <span className="text-red-600 font-bold">{val || '-'}</span> },
+  // Other containers - Total
+  { 
+    title: '45HC-Total', 
+    dataIndex: '45hc-total', 
+    width: 110, 
+    render: (val: any, record: any) => {
+      const basePrice = record['45hc'] || 0;
+      if (!basePrice) return '-';
+      const diff = (record.totalPrice || 0) - (record.basePrice || 0);
+      const totalPrice = basePrice + (diff > 0 ? diff : 0);
+      return <span className="text-[#1e3a8a] font-bold">{totalPrice}</span>;
+    }
+  },
+  { 
+    title: '20NOR-Total', 
+    dataIndex: '20nor-total', 
+    width: 110, 
+    render: (val: any, record: any) => {
+      const basePrice = record['20nor'] || 0;
+      if (!basePrice) return '-';
+      const diff = (record.totalPrice || 0) - (record.basePrice || 0);
+      const totalPrice = basePrice + (diff > 0 ? diff : 0);
+      return <span className="text-[#1e3a8a] font-bold">{totalPrice}</span>;
+    }
+  },
+  { 
+    title: '40NOR-Total', 
+    dataIndex: '40nor-total', 
+    width: 110, 
+    render: (val: any, record: any) => {
+      const basePrice = record['40nor'] || 0;
+      if (!basePrice) return '-';
+      const diff = (record.totalPrice || 0) - (record.basePrice || 0);
+      const totalPrice = basePrice + (diff > 0 ? diff : 0);
+      return <span className="text-[#1e3a8a] font-bold">{totalPrice}</span>;
+    }
+  },
+  { 
+    title: '20HC-Total', 
+    dataIndex: '20hc-total', 
+    width: 110, 
+    render: (val: any, record: any) => {
+      const basePrice = record['20hc'] || 0;
+      if (!basePrice) return '-';
+      const diff = (record.totalPrice || 0) - (record.basePrice || 0);
+      const totalPrice = basePrice + (diff > 0 ? diff : 0);
+      return <span className="text-[#1e3a8a] font-bold">{totalPrice}</span>;
+    }
+  },
+  { 
+    title: '20TK-Total', 
+    dataIndex: '20tk-total', 
+    width: 110, 
+    render: (val: any, record: any) => {
+      const basePrice = record['20tk'] || 0;
+      if (!basePrice) return '-';
+      const diff = (record.totalPrice || 0) - (record.basePrice || 0);
+      const totalPrice = basePrice + (diff > 0 ? diff : 0);
+      return <span className="text-[#1e3a8a] font-bold">{totalPrice}</span>;
+    }
+  },
+  { 
+    title: '40TK-Total', 
+    dataIndex: '40tk-total', 
+    width: 110, 
+    render: (val: any, record: any) => {
+      const basePrice = record['40tk'] || 0;
+      if (!basePrice) return '-';
+      const diff = (record.totalPrice || 0) - (record.basePrice || 0);
+      const totalPrice = basePrice + (diff > 0 ? diff : 0);
+      return <span className="text-[#1e3a8a] font-bold">{totalPrice}</span>;
+    }
+  },
+  { 
+    title: '20OT-Total', 
+    dataIndex: '20ot-total', 
+    width: 110, 
+    render: (val: any, record: any) => {
+      const basePrice = record['20ot'] || 0;
+      if (!basePrice) return '-';
+      const diff = (record.totalPrice || 0) - (record.basePrice || 0);
+      const totalPrice = basePrice + (diff > 0 ? diff : 0);
+      return <span className="text-[#1e3a8a] font-bold">{totalPrice}</span>;
+    }
+  },
+  { 
+    title: '40OT-Total', 
+    dataIndex: '40ot-total', 
+    width: 110, 
+    render: (val: any, record: any) => {
+      const basePrice = record['40ot'] || 0;
+      if (!basePrice) return '-';
+      const diff = (record.totalPrice || 0) - (record.basePrice || 0);
+      const totalPrice = basePrice + (diff > 0 ? diff : 0);
+      return <span className="text-[#1e3a8a] font-bold">{totalPrice}</span>;
+    }
+  },
+  { 
+    title: '20FR-Total', 
+    dataIndex: '20fr-total', 
+    width: 110, 
+    render: (val: any, record: any) => {
+      const basePrice = record['20fr'] || 0;
+      if (!basePrice) return '-';
+      const diff = (record.totalPrice || 0) - (record.basePrice || 0);
+      const totalPrice = basePrice + (diff > 0 ? diff : 0);
+      return <span className="text-[#1e3a8a] font-bold">{totalPrice}</span>;
+    }
+  },
+  { 
+    title: '40FR-Total', 
+    dataIndex: '40fr-total', 
+    width: 110, 
+    render: (val: any, record: any) => {
+      const basePrice = record['40fr'] || 0;
+      if (!basePrice) return '-';
+      const diff = (record.totalPrice || 0) - (record.basePrice || 0);
+      const totalPrice = basePrice + (diff > 0 ? diff : 0);
+      return <span className="text-[#1e3a8a] font-bold">{totalPrice}</span>;
+    }
+  },
+];
+
 
 const RateQuery: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const [activeTab, setActiveTab] = useState<string>('fcl');
+  const [notification, contextHolder] = Notification.useNotification();
+  const [modal, modalContextHolder] = Modal.useModal();
+  const [activeTab, setActiveTab] = useState<string>('ecommerce');
   const [customTableModalVisible, setCustomTableModalVisible] = useState(false);
+  
+  // 运价置顶状态
+  const [pinnedRateIds, setPinnedRateIds] = useState<string[]>(() => {
+    const saved = localStorage.getItem('pinnedRateIds');
+    return saved ? JSON.parse(saved) : [];
+  });
+  const [showAllPinned, setShowAllPinned] = useState(false);
+
+  useEffect(() => {
+    localStorage.setItem('pinnedRateIds', JSON.stringify(pinnedRateIds));
+  }, [pinnedRateIds]);
+
+  // Ecommerce Column Settings
+  const [ecommerceColumnSettings, setEcommerceColumnSettings] = useState<{
+    visible: Record<string, boolean>;
+    order: string[];
+  }>(() => {
+    const saved = localStorage.getItem('ecommerceColumnSettings');
+    if (saved) {
+      return JSON.parse(saved);
+    }
+    return {
+      visible: {
+        id: false,
+        transportTerms: true,
+        carrierName: true,
+        pol: true,
+        pod: true,
+        routeCode: true,
+        etd: true,
+        eta: true,
+        transitType: true,
+        validFrom: true,
+        validTo: true,
+        spaceStatus: true,
+        cargoType: true,
+        '20gp': true,
+        '20gp-total': true,
+        '40gp': true,
+        '40gp-total': true,
+        '40hc': true,
+        '40hc-total': true,
+        '45hc': false,
+        '45hc-total': false,
+        '20nor': false,
+        '20nor-total': false,
+        '40nor': false,
+        '40nor-total': false,
+        '20hc': false,
+        '20hc-total': false,
+        '20tk': false,
+        '20tk-total': false,
+        '40tk': false,
+        '40tk-total': false,
+        '20ot': false,
+        '20ot-total': false,
+        '40ot': false,
+        '40ot-total': false,
+        '20fr': false,
+        '20fr-total': false,
+        '40fr': false,
+        '40fr-total': false,
+        surchargeLabel: false,
+        surchargeAmount: false,
+        cutoffDate: false,
+        updateTime: true
+      },
+      order: [
+        'carrierName', 'pol', 'pod', 'transportTerms', 'routeCode',
+        'etd', 'eta', 'transitType', 'validFrom', 'validTo', 'spaceStatus',
+        '20gp', '20gp-total', '40gp', '40gp-total', '40hc', '40hc-total', 
+        'id', 'cargoType', '45hc', '45hc-total', '20nor', '20nor-total', '40nor', '40nor-total',
+        '20hc', '20hc-total', '20tk', '20tk-total', '40tk', '40tk-total',
+        '20ot', '20ot-total', '40ot', '40ot-total', '20fr', '20fr-total', '40fr', '40fr-total',
+        'surchargeLabel', 'surchargeAmount', 'cutoffDate', 'updateTime'
+      ]
+    };
+  });
+
+  const saveEcommerceSettings = () => {
+    localStorage.setItem('ecommerceColumnSettings', JSON.stringify(ecommerceColumnSettings));
+    Message.success('配置已保存');
+    closeCustomTableModal();
+  };
+
+  const resetEcommerceSettings = () => {
+    setEcommerceColumnSettings({
+      visible: {
+        id: false,
+        transportTerms: true,
+        carrierName: true,
+        pol: true,
+        pod: true,
+        routeCode: true,
+        etd: true,
+        eta: true,
+        transitType: true,
+        validFrom: true,
+        validTo: true,
+        spaceStatus: true,
+        cargoType: true,
+        '20gp': true,
+        '20gp-total': true,
+        '40gp': true,
+        '40gp-total': true,
+        '40hc': true,
+        '40hc-total': true,
+        '45hc': false,
+        '45hc-total': false,
+        '20nor': false,
+        '20nor-total': false,
+        '40nor': false,
+        '40nor-total': false,
+        '20hc': false,
+        '20hc-total': false,
+        '20tk': false,
+        '20tk-total': false,
+        '40tk': false,
+        '40tk-total': false,
+        '20ot': false,
+        '20ot-total': false,
+        '40ot': false,
+        '40ot-total': false,
+        '20fr': false,
+        '20fr-total': false,
+        '40fr': false,
+        '40fr-total': false,
+        surchargeLabel: false,
+        surchargeAmount: false,
+        cutoffDate: false,
+        updateTime: true
+      },
+      order: [
+        'carrierName', 'pol', 'pod', 'transportTerms', 'routeCode',
+        'etd', 'eta', 'transitType', 'validFrom', 'validTo', 'spaceStatus',
+        '20gp', '20gp-total', '40gp', '40gp-total', '40hc', '40hc-total', 
+        'id', 'cargoType', '45hc', '45hc-total', '20nor', '20nor-total', '40nor', '40nor-total',
+        '20hc', '20hc-total', '20tk', '20tk-total', '40tk', '40tk-total',
+        '20ot', '20ot-total', '40ot', '40ot-total', '20fr', '20fr-total', '40fr', '40fr-total',
+        'surchargeLabel', 'surchargeAmount', 'cutoffDate', 'updateTime'
+      ]
+    });
+    Message.success('已恢复默认配置');
+  };
+
+  const [priceDisplayMode, setPriceDisplayMode] = useState<('total' | 'base')[]>(['total', 'base']);
   
   // 客户端访问标识 - 用于控制运价状态列显示
   const isClientAccess = false; // 默认为运营版，显示运价状态列
@@ -788,22 +1691,59 @@ const RateQuery: React.FC = () => {
   const [selectAll, setSelectAll] = useState(false);
   const [indeterminate, setIndeterminate] = useState(false);
   
-  // 处理全选
+  // 获取表格数据
+  const getTableData = (): any => {
+    switch (activeTab) {
+      case 'ecommerce':
+        return ecommerceData;
+      case 'lcl':
+        return lclData;
+      case 'air':
+        return airData;
+      case 'precarriage':
+        return precarriageData;
+      case 'oncarriage':
+        return oncarriageData;
+      case 'fcl':
+      default:
+        return fclData;
+    }
+  };
+
+  // 获取置顶数据
+  const getPinnedData = () => {
+    const allData = getTableData();
+    return allData.filter((item: any) => pinnedRateIds.includes(item.key));
+  };
+
+  // 获取未置顶数据 (主列表显示)
+  const getUnpinnedData = () => {
+    const allData = getTableData();
+    return allData.filter((item: any) => !pinnedRateIds.includes(item.key));
+  };
+
+  // 处理全选 (只选未置顶的可见数据)
   const handleSelectAll = (checked: boolean) => {
     if (checked) {
-      const currentData = getTableData();
+      const currentData = getUnpinnedData();
       const allKeys = currentData.map((item: any) => item.key);
-      setSelectedRowKeys(allKeys);
+      // 如果已经有选中的置顶项，保留它们
+      const pinnedSelected = selectedRowKeys.filter(key => pinnedRateIds.includes(key));
+      setSelectedRowKeys([...pinnedSelected, ...allKeys]);
       setSelectAll(true);
       setIndeterminate(false);
     } else {
-      setSelectedRowKeys([]);
+      // 取消全选时，仅取消未置顶的选中项，还是全部取消？通常全选checkbox控制的是下面的列表。
+      // 如果用户想取消置顶项的选择，应该去置顶列表操作。
+      // 这里只操作未置顶项
+      const pinnedSelected = selectedRowKeys.filter(key => pinnedRateIds.includes(key));
+      setSelectedRowKeys(pinnedSelected);
       setSelectAll(false);
       setIndeterminate(false);
     }
   };
   
-  // 处理单行选择
+  // 处理单行选择 (需要适配)
   const handleRowSelect = (key: string, checked: boolean) => {
     let newSelectedKeys;
     if (checked) {
@@ -814,10 +1754,15 @@ const RateQuery: React.FC = () => {
     
     setSelectedRowKeys(newSelectedKeys);
     
-    if (newSelectedKeys.length === 0) {
+    // Check status for unpinned list select all checkbox
+    const unpinnedData = getUnpinnedData();
+    const unpinnedKeys = unpinnedData.map((item: any) => item.key);
+    const selectedUnpinnedCount = newSelectedKeys.filter(k => unpinnedKeys.includes(k)).length;
+    
+    if (selectedUnpinnedCount === 0) {
       setSelectAll(false);
       setIndeterminate(false);
-    } else if (newSelectedKeys.length === getTableData().length) {
+    } else if (selectedUnpinnedCount === unpinnedKeys.length && unpinnedKeys.length > 0) {
       setSelectAll(true);
       setIndeterminate(false);
     } else {
@@ -825,6 +1770,38 @@ const RateQuery: React.FC = () => {
        setIndeterminate(true);
      }
    };
+
+  // 处理置顶操作
+  const handlePinOperation = () => {
+    if (selectedRowKeys.length === 0) {
+      Message.warning('请先选择运价');
+      return;
+    }
+
+    const pinnedSelected = selectedRowKeys.filter(key => pinnedRateIds.includes(key));
+    const unpinnedSelected = selectedRowKeys.filter(key => !pinnedRateIds.includes(key));
+
+    if (pinnedSelected.length > 0 && unpinnedSelected.length > 0) {
+      // 置换置顶: 取消选中的置顶，置顶选中的未置顶
+      const newPinnedIds = pinnedRateIds.filter(id => !pinnedSelected.includes(id));
+      setPinnedRateIds([...newPinnedIds, ...unpinnedSelected]);
+      Message.success('已置换置顶运价');
+    } else if (pinnedSelected.length > 0) {
+      // 取消置顶
+      const newPinnedIds = pinnedRateIds.filter(id => !pinnedSelected.includes(id));
+      setPinnedRateIds(newPinnedIds);
+      Message.success('已取消置顶');
+    } else if (unpinnedSelected.length > 0) {
+      // 运价置顶
+      setPinnedRateIds([...pinnedRateIds, ...unpinnedSelected]);
+      Message.success('已置顶运价');
+    }
+    
+    // 清空选择，体验更好？或者保留？保留选择比较好。
+    setSelectedRowKeys([]);
+    setSelectAll(false);
+    setIndeterminate(false);
+  };
 
   const [filterFieldModalVisible, setFilterFieldModalVisible] = useState(false);
   const [schemeModalVisible, setSchemeModalVisible] = useState(false);
@@ -855,7 +1832,111 @@ const RateQuery: React.FC = () => {
     };
     
     document.addEventListener('mousedown', handleClickOutside);
-    return () => {
+    // 渲染置顶区域
+  const renderPinnedSection = () => {
+    const pinnedData = getPinnedData();
+    if (pinnedData.length === 0) return null;
+
+    const visiblePinnedData = showAllPinned ? pinnedData : pinnedData.slice(0, 10);
+    const hasMore = pinnedData.length > 10;
+
+    // Calculate checkbox state for pinned section
+    const visiblePinnedKeys = visiblePinnedData.map((item: any) => item.key);
+    const selectedPinnedCount = selectedRowKeys.filter(key => visiblePinnedKeys.includes(key)).length;
+    const isPinnedAllSelected = visiblePinnedData.length > 0 && selectedPinnedCount === visiblePinnedData.length;
+    const isPinnedIndeterminate = selectedPinnedCount > 0 && selectedPinnedCount < visiblePinnedData.length;
+
+    // Handle Pinned Select All
+    const handlePinnedSelectAll = (checked: boolean) => {
+      if (checked) {
+        // Add all visible pinned keys to selectedRowKeys, keeping existing non-pinned selections
+        const otherSelected = selectedRowKeys.filter(key => !visiblePinnedKeys.includes(key));
+        const newSelected = Array.from(new Set([...otherSelected, ...visiblePinnedKeys]));
+        setSelectedRowKeys(newSelected);
+      } else {
+        // Remove all visible pinned keys from selectedRowKeys
+        const newSelected = selectedRowKeys.filter(key => !visiblePinnedKeys.includes(key));
+        setSelectedRowKeys(newSelected);
+      }
+    };
+
+    return (
+      <div className="mb-4">
+        <div className="bg-gray-100 p-2 rounded-t flex justify-between items-center border-b border-gray-200">
+           <div className="flex items-center text-gray-700 font-bold">
+              <Checkbox 
+                checked={isPinnedAllSelected} 
+                indeterminate={isPinnedIndeterminate}
+                onChange={handlePinnedSelectAll}
+                className="mr-2"
+              />
+              <IconPushpin className="mr-2 text-blue-600" />
+              <span>置顶运价 ({pinnedData.length})</span>
+           </div>
+           {hasMore && (
+             <Button 
+               type="text" 
+               size="mini" 
+               onClick={() => setShowAllPinned(!showAllPinned)}
+               className="text-blue-600"
+             >
+               {showAllPinned ? '收起置顶运价' : '展开全部置顶运价'}
+             </Button>
+           )}
+        </div>
+        
+        <div className="bg-gray-50 border border-gray-200 rounded-b p-2 overflow-hidden">
+          {viewMode === 'list' ? (
+             <Table
+               rowKey="key"
+               rowSelection={activeTab === 'ecommerce' ? {
+                 type: 'checkbox',
+                 selectedRowKeys,
+                 columnTitle: " ", // Hide default select all checkbox
+                 onSelect: (selected, record) => {
+                    handleRowSelect(record.key, selected);
+                 },
+                 onSelectAll: (selected, selectedRows) => {
+                    const currentTableKeys = visiblePinnedData.map((r: any) => r.key);
+                    if (selected) {
+                       const newSet = new Set([...selectedRowKeys, ...currentTableKeys]);
+                       setSelectedRowKeys(Array.from(newSet));
+                    } else {
+                       const newKeys = selectedRowKeys.filter(k => !currentTableKeys.includes(k));
+                       setSelectedRowKeys(newKeys);
+                    }
+                 }
+               } : undefined}
+               loading={false}
+               columns={getTableColumns()}
+               data={visiblePinnedData}
+               pagination={false}
+               scroll={{ x: 2740 }}
+               border={false}
+               className="inquiry-table-nowrap pinned-table"
+             />
+          ) : (
+             <CardView data={visiblePinnedData} />
+          )}
+        </div>
+      </div>
+    );
+  };
+
+  const getPinButtonText = () => {
+    const pinnedSelected = selectedRowKeys.filter(key => pinnedRateIds.includes(key));
+    const unpinnedSelected = selectedRowKeys.filter(key => !pinnedRateIds.includes(key));
+    
+    if (pinnedSelected.length > 0 && unpinnedSelected.length > 0) {
+      return '置换置顶';
+    } else if (pinnedSelected.length > 0) {
+      return '取消置顶';
+    } else {
+      return '运价置顶';
+    }
+  };
+
+  return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, [showContainerDropdown]);
@@ -880,6 +1961,11 @@ const RateQuery: React.FC = () => {
   // 运价趋势弹窗状态
   const [rateTrendModalVisible, setRateTrendModalVisible] = useState(false);
   
+  // 运价详情弹窗状态
+  const [rateDetailModalVisible, setRateDetailModalVisible] = useState(false);
+  const [currentRateDetail, setCurrentRateDetail] = useState<any>(null);
+  const [rateDetailInitialTab, setRateDetailInitialTab] = useState<string>('cost');
+  
   // 导出运价弹窗状态
   const [exportModalVisible, setExportModalVisible] = useState(false);
 
@@ -888,7 +1974,32 @@ const RateQuery: React.FC = () => {
    * 显示导出成功提示弹窗
    */
   const handleExportRate = () => {
-    setExportModalVisible(true);
+    // 如果有选中运价，直接导出
+    if (selectedRowKeys.length > 0) {
+      const exportCount = selectedRowKeys.length;
+      notification.success({
+        title: '导出成功',
+        content: `Excel导出成功，共导出${exportCount}条记录`,
+        duration: 3000
+      });
+    } else {
+      // 如果未选中任何运价，询问是否导出全部
+      modal.confirm({
+        title: '确认导出',
+        content: '是否发起导出任务，导出目前查询条件下的所有运价结果？',
+        okText: '确认',
+        cancelText: '取消',
+        onOk: () => {
+          // 模拟导出所有记录
+          const totalCount = 9232; // 模拟总数
+          notification.success({
+            title: '导出成功',
+            content: `Excel导出成功，共导出${totalCount}条记录`,
+            duration: 3000
+          });
+        }
+      });
+    }
   };
 
   /**
@@ -916,38 +2027,109 @@ const RateQuery: React.FC = () => {
   // 运输类型筛选状态
   const [transitFilter, setTransitFilter] = useState<string>('all');
   
-  // 船公司筛选状态
-  const [selectedShippingCompanies, setSelectedShippingCompanies] = useState<string[]>([]);
-  
   // 船公司选项
-  const shippingCompanyOptions = [
-    { label: 'MSK-马士基', value: 'MSK' },
-    { label: 'MSC-地中海', value: 'MSC' },
-    { label: 'CMA-达飞', value: 'CMA' },
-    { label: 'COSCO-中远海运', value: 'COSCO' },
-    { label: 'EVERGREEN-长荣', value: 'EVERGREEN' },
-    { label: 'HAPAG-赫伯罗特', value: 'HAPAG' },
-    { label: 'ONE-海洋网联', value: 'ONE' },
-    { label: 'YML-阳明海运', value: 'YML' }
-  ];
-  
-  // 船公司选择变化处理
-  const handleShippingCompanyChange = (values: string[]) => {
-    setSelectedShippingCompanies(values);
-  };
+  const shippingCompanyOptions = SHIPPING_COMPANY_OPTIONS;
+
+  // 船公司筛选状态 - 默认全选
+  const [selectedShippingCompanies, setSelectedShippingCompanies] = useState<string[]>(
+    shippingCompanyOptions.map(option => option.value)
+  );
   
   // 箱型筛选状态
   const [selectedContainerTypes, setSelectedContainerTypes] = useState<string[]>([]);
   
   // 箱型选项
-  const containerTypeOptions = [
-    { label: '20GP', value: '20GP' },
-    { label: '40GP', value: '40GP' },
-    { label: '40HC', value: '40HC' },
-    { label: '45HC', value: '45HC' },
-    { label: '20NOR', value: '20NOR' },
-    { label: '40NOR', value: '40NOR' }
-  ];
+  const containerTypeOptions = BOX_TYPE_OPTIONS;
+  
+  // 电商运价查询状态
+  const [ecommerceOrigin, setEcommerceOrigin] = useState<string>('');
+  const [ecommerceDestination, setEcommerceDestination] = useState<string>('');
+  const [ecommerceWeight, setEcommerceWeight] = useState<string>('');
+  const [isSearching, setIsSearching] = useState(false);
+  const [hasSearched, setHasSearched] = useState(false);
+  const [searchProgressData, setSearchProgressData] = useState<CarrierProgress[]>([]);
+
+  // 处理电商运价查询
+  const handleEcommerceSearch = () => {
+    let origin = ecommerceOrigin;
+    let destination = ecommerceDestination;
+    
+    // 如果是列表模式，从筛选条件中获取值
+    if (viewMode === 'list') {
+       const polCondition = filterConditions.find(c => c.key === 'pol');
+       const podCondition = filterConditions.find(c => c.key === 'pod');
+       const boxTypeCondition = filterConditions.find(c => c.key === 'boxType');
+
+       origin = polCondition?.value || '';
+       destination = podCondition?.value || '';
+
+       // 校验20GP箱型必须填写重量
+       if (boxTypeCondition?.value === '20GP' && !ecommerceWeight) {
+          notification.error({
+            title: '查询校验失败',
+            content: '选择20GP箱型时必须填写毛重',
+            position: 'topRight'
+          });
+          return;
+       }
+    }
+
+    if (!origin || !destination) {
+      notification.error({
+        title: '查询校验失败',
+        content: '请输入起运港和目的港',
+        position: 'topRight'
+      });
+      return;
+    }
+
+    setIsSearching(true);
+    // 初始化查询进度数据
+    const initialProgress: CarrierProgress[] = [
+      { carrierCode: 'MSK', carrierName: 'MAERSK', logo: '/assets/carrier/MSK.png', status: 'waiting' },
+      { carrierCode: 'CMA', carrierName: 'CMA CGM', logo: '/assets/carrier/CMA.png', status: 'waiting' },
+      { carrierCode: 'COSCO', carrierName: 'COSCO', logo: '/assets/carrier/COSCO.png', status: 'waiting' },
+      { carrierCode: 'ONE', carrierName: 'ONE', logo: '/assets/carrier/ONE.png', status: 'waiting' },
+      { carrierCode: 'EMC', carrierName: 'EVERGREEN', logo: '/assets/carrier/EMC.png', status: 'waiting' },
+      { carrierCode: 'HPL', carrierName: 'HAPAG-LLOYD', logo: '/assets/carrier/HPL_SPOT.png', status: 'waiting' }
+    ];
+    setSearchProgressData(initialProgress);
+
+    // 模拟查询过程
+    initialProgress.forEach((carrier, index) => {
+      // 1. 变为查询中
+      setTimeout(() => {
+        setSearchProgressData(prev => prev.map(p => 
+          p.carrierCode === carrier.carrierCode ? { ...p, status: 'searching' } : p
+        ));
+      }, index * 800 + 100);
+
+      // 2. 变为完成
+      setTimeout(() => {
+        setSearchProgressData(prev => prev.map(p => 
+          p.carrierCode === carrier.carrierCode ? { 
+            ...p, 
+            status: 'completed', 
+            count: Math.floor(Math.random() * 5) + 1 
+          } : p
+        ));
+        
+        // 如果是最后一个，结束查询状态
+        if (index === initialProgress.length - 1) {
+          setTimeout(() => {
+            setIsSearching(false);
+            setHasSearched(true);
+            Message.success('查询完成，已为您找到最新的运价信息');
+          }, 1000);
+        }
+      }, index * 800 + 1500 + Math.random() * 1000);
+    });
+  };
+
+  // 船公司选择变化处理
+  const handleShippingCompanyChange = (values: string[]) => {
+    setSelectedShippingCompanies(values);
+  };
   
   // 箱型选择变化处理
   const handleContainerTypeChange = (values: string[]) => {
@@ -958,6 +2140,11 @@ const RateQuery: React.FC = () => {
   const [cargoTimeMode, setCargoTimeMode] = useState<'range' | 'date'>('range');
   const [cargoTimeRange, setCargoTimeRange] = useState<string>('一周内');
   const [cargoDate, setCargoDate] = useState<any>(null);
+  
+  // ETD和ETA日期范围状态
+  const [etdDateRange, setEtdDateRange] = useState<any[]>([]);
+  const [etaDateRange, setEtaDateRange] = useState<any[]>([]);
+  
   const [recentSearches] = useState([
     { origin: 'Shanghai', destination: 'Los Angeles', cargoTime: '一周内' },
     { origin: 'Ningbo', destination: 'Hamburg', cargoTime: '二周内' },
@@ -967,6 +2154,7 @@ const RateQuery: React.FC = () => {
 
   // 批量报价弹窗状态
   const [batchQuoteModalVisible, setBatchQuoteModalVisible] = useState(false);
+  const [quickQuoteItem, setQuickQuoteItem] = useState<any>(null);
   const [sailingScheduleModalVisible, setSailingScheduleModalVisible] = useState(false);
 
   // 批量报价按钮点击处理
@@ -978,22 +2166,471 @@ const RateQuery: React.FC = () => {
     setBatchQuoteModalVisible(true);
   };
 
+  // 快速报价处理
+  const handleQuickQuote = (record: any) => {
+    setQuickQuoteItem(record);
+    setBatchQuoteModalVisible(true);
+  };
+
   // 查看可用船期按钮点击处理
   const handleViewAvailableSailings = () => {
     setSailingScheduleModalVisible(true);
   };
 
+  // 处理AI分析
+  const handleAiAnalysis = () => {
+    // 收集筛选条件
+    const filters: any = {};
+    filterConditions.forEach(condition => {
+      if (condition.value) {
+        filters[condition.key] = condition.value;
+      }
+    });
+    if (selectedShippingCompanies.length > 0) {
+      filters.shippingCompany = selectedShippingCompanies;
+    }
+    if (selectedContainerTypes.length > 0) {
+      filters.containerType = selectedContainerTypes;
+    }
+
+    const event = new CustomEvent('openAiAssistant', {
+      detail: {
+        skill: '运价分析',
+        input: '根据当前筛选条件与查询到的运价，进行运价分析',
+        context: {
+          type: 'filter',
+          activeTab,
+          filters
+        }
+      }
+    });
+    window.dispatchEvent(event);
+  };
+
+  // 处理单个运价AI分析
+  const handleSingleRateAnalysis = (record: any) => {
+    const event = new CustomEvent('openAiAssistant', {
+      detail: {
+        skill: '运价分析',
+        input: '分析该运价是否划算，给出选择建议',
+        context: {
+          type: 'row',
+          record
+        }
+      }
+    });
+    window.dispatchEvent(event);
+  };
+
+  // 监听AI助手请求打开运价详情或快速报价
+  useEffect(() => {
+    const handleTriggerRateAction = (event: CustomEvent) => {
+      const { action, rateId, rate } = event.detail || {};
+      if (action === 'viewDetail') {
+        // 如果有rate对象，可以直接使用，否则可能需要根据ID查找（这里简化处理，假设传递了足够信息或ID足够）
+        // 这里的handleViewRateDetail需要record对象，如果只有ID可能需要调整，
+        // 但AI助手传递过来的rate对象通常包含必要信息
+        if (rate) {
+          handleViewRateDetail(rate);
+        } else if (rateId) {
+           // 尝试在当前数据中查找
+           const record = getTableData().find((item: any) => item.key === rateId || item.id === rateId);
+           if (record) {
+             handleViewRateDetail(record);
+           } else {
+             // 如果找不到，构建一个最小可用对象或跳转
+             handleViewFclRate(rateId);
+           }
+        }
+      } else if (action === 'quickQuote') {
+        if (rate) {
+          handleQuickQuote(rate);
+        } else if (rateId) {
+           const record = getTableData().find((item: any) => item.key === rateId || item.id === rateId);
+           if (record) {
+             handleQuickQuote(record);
+           } else {
+             Message.warning('未找到对应运价信息');
+           }
+        }
+      }
+    };
+
+    window.addEventListener('triggerRateAction', handleTriggerRateAction as EventListener);
+    return () => {
+      window.removeEventListener('triggerRateAction', handleTriggerRateAction as EventListener);
+    };
+  }, [activeTab]);
+
   // 运价趋势按钮点击处理
-  const handleViewRateTrend = () => {
-    setRateTrendModalVisible(true);
+  const handleViewRateTrend = (item?: any) => {
+    if (item) {
+      setCurrentRateDetail(item);
+    }
+    setRateDetailInitialTab('trend');
+    setRateDetailModalVisible(true);
   };
 
   // 筛选区收起/展开状态
 
   // 移除卡片展开状态管理，固定为展开状态
 
+  // 城市SVG图标
+  const CitySvg = () => (
+    <svg width="1em" height="1em" viewBox="0 0 48 48" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="butt" strokeLinejoin="miter">
+      <path d="M4 44H44" />
+      <path d="M10 44V20L24 12L38 20V44" />
+      <path d="M24 44V34" />
+      <path d="M18 26H30" />
+      <path d="M18 34H24" />
+      <path d="M30 34H24" />
+    </svg>
+  );
+
+  // 船锚SVG图标
+  const AnchorSvg = () => (
+    <svg width="1em" height="1em" viewBox="0 0 48 48" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="butt" strokeLinejoin="miter">
+      <path d="M24 4V44" />
+      <path d="M10 24C10 31.732 16.268 38 24 38C31.732 38 38 31.732 38 24" />
+      <circle cx="24" cy="10" r="4" />
+      <path d="M20 16H28" />
+    </svg>
+  );
+
   // 卡片式视图组件 - 一行显示一个卡片
   const CardView: React.FC<{ data: any[] }> = ({ data }) => {
+    if (activeTab === 'ecommerce') {
+      return (
+        <div className="space-y-4 mt-4">
+          {data.map((item: any) => (
+            <Card key={item.key} className="hover:shadow-lg transition-shadow duration-300 relative">
+              {/* Header: Carrier Info, Route Info */}
+              <div className="flex justify-between items-start mb-4">
+                 <div className="flex items-center space-x-3">
+                    <Checkbox 
+                      checked={selectedRowKeys.includes(item.key)}
+                      onChange={(checked) => handleRowSelect(item.key, checked)}
+                    />
+                    <Tag color="green">{item.transportTerms || 'CY-CY'}</Tag>
+                    <Tag color={item.spaceStatus === '现舱' ? 'green' : 'red'}>{item.spaceStatus}</Tag>
+                    
+                    {(() => {
+                        const { color, text, timeDisplay } = getFreshnessConfig(item.updateTime);
+                        return (
+                            <div className="flex items-center ml-2">
+                                <Tooltip content={timeDisplay}>
+                                    <Tag color={color} size="small" className="mr-2" style={{ borderColor: 'transparent', minWidth: '48px', textAlign: 'center' }}>{text}</Tag>
+                                </Tooltip>
+                                <span className="text-gray-500 text-xs">{item.updateTime}</span>
+                            </div>
+                        );
+                    })()}
+                 </div>
+                 <div className="flex items-center space-x-2">
+                    <span className="text-gray-500 text-xs">有效期: {item.validFrom} ~ {item.validTo}</span>
+                 </div>
+              </div>
+              
+              <div className="flex items-center">
+                 {/* Carrier */}
+                 <div className="flex flex-col items-center w-24 mr-4">
+                    <img 
+                      src={item.carrierLogo} 
+                      alt={item.carrierName} 
+                      className="w-10 h-10 object-contain" 
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src = 'https://via.placeholder.com/40?text=' + item.carrierName;
+                      }}
+                    />
+                    <span className="font-bold mt-1 text-sm">{item.carrierName}</span>
+                 </div>
+                 
+                {/* Route */}
+                 <div className="flex flex-col px-4 relative" style={{ width: '45%', flex: '0 0 45%' }}>
+                    {(() => {
+                        const getPortInfo = (val: string) => {
+                            let name = val || '';
+                            if (val && val.includes('|')) {
+                                name = val.split('|')[1].trim();
+                            }
+                            
+                            // 简单的城市/国家/UNICODE映射
+                            const cityMap: Record<string, { city: string, country: string, code: string, unicode: string, portName?: string }> = {
+                                'Shanghai': { city: 'Shanghai', country: 'China', code: 'CN', unicode: 'CNSHA', portName: 'Yangshan' },
+                                'Ningbo': { city: 'Ningbo', country: 'China', code: 'CN', unicode: 'CNNGB', portName: 'Zhoushan' },
+                                'Shenzhen': { city: 'Shenzhen', country: 'China', code: 'CN', unicode: 'CNSZX', portName: 'Yantian' },
+                                'Yantian': { city: 'Shenzhen', country: 'China', code: 'CN', unicode: 'CNYTN', portName: 'Yantian' },
+                                'Qingdao': { city: 'Qingdao', country: 'China', code: 'CN', unicode: 'CNQDA', portName: 'Qingdao Port' },
+                                'Xiamen': { city: 'Xiamen', country: 'China', code: 'CN', unicode: 'CNXMN', portName: 'Xiamen Port' },
+                                'Tianjin': { city: 'Tianjin', country: 'China', code: 'CN', unicode: 'CNTJN', portName: 'Tianjin Port' },
+                                'Guangzhou': { city: 'Guangzhou', country: 'China', code: 'CN', unicode: 'CNGZG', portName: 'Nansha' },
+                                'Hamburg': { city: 'Hamburg', country: 'Germany', code: 'DE', unicode: 'DEHAM', portName: 'Hamburg Port' },
+                                'Rotterdam': { city: 'Rotterdam', country: 'Netherlands', code: 'NL', unicode: 'NLRTM', portName: 'Rotterdam Port' },
+                                'Antwerp': { city: 'Antwerp', country: 'Belgium', code: 'BE', unicode: 'BEANR', portName: 'Antwerp Port' },
+                                'Felixstowe': { city: 'Felixstowe', country: 'United Kingdom', code: 'GB', unicode: 'GBFXT', portName: 'Felixstowe Port' },
+                                'Southampton': { city: 'Southampton', country: 'United Kingdom', code: 'GB', unicode: 'GBSOU', portName: 'Southampton Port' },
+                                'Le Havre': { city: 'Le Havre', country: 'France', code: 'FR', unicode: 'FRLEH', portName: 'Le Havre Port' },
+                                'Singapore': { city: 'Singapore', country: 'Singapore', code: 'SG', unicode: 'SGSIN', portName: 'Singapore Port' },
+                                'Busan': { city: 'Busan', country: 'Korea', code: 'KR', unicode: 'KRPUS', portName: 'Busan Port' },
+                                'Port Klang': { city: 'Port Klang', country: 'Malaysia', code: 'MY', unicode: 'MYPKG', portName: 'Port Klang' },
+                                'Jebel Ali': { city: 'Dubai', country: 'United Arab Emirates', code: 'AE', unicode: 'AEJEA', portName: 'Jebel Ali' },
+                                'Los Angeles': { city: 'Los Angeles', country: 'United States', code: 'US', unicode: 'USLAX', portName: 'LA Terminal' },
+                                'Long Beach': { city: 'Long Beach', country: 'United States', code: 'US', unicode: 'USLGB', portName: 'LB Terminal' },
+                                'New York': { city: 'New York', country: 'United States', code: 'US', unicode: 'USNYC', portName: 'NY Terminal' },
+                                'Savannah': { city: 'Savannah', country: 'United States', code: 'US', unicode: 'USSAV', portName: 'Savannah Port' },
+                                'Vancouver': { city: 'Vancouver', country: 'Canada', code: 'CA', unicode: 'CAVAN', portName: 'Vancouver Port' },
+                                'Toronto': { city: 'Toronto', country: 'Canada', code: 'CA', unicode: 'CATOR', portName: 'Toronto Port' },
+                                'Tokyo': { city: 'Tokyo', country: 'Japan', code: 'JP', unicode: 'JPTYO', portName: 'Tokyo Port' },
+                                'Yokohama': { city: 'Yokohama', country: 'Japan', code: 'JP', unicode: 'JPYOK', portName: 'Yokohama Port' },
+                                'Nagoya': { city: 'Nagoya', country: 'Japan', code: 'JP', unicode: 'JPNGO', portName: 'Nagoya Port' },
+                                'Osaka': { city: 'Osaka', country: 'Japan', code: 'JP', unicode: 'JPOSA', portName: 'Osaka Port' },
+                                'Kobe': { city: 'Kobe', country: 'Japan', code: 'JP', unicode: 'JPUKB', portName: 'Kobe Port' },
+                            };
+                            
+                            // 尝试匹配
+                            const lookupKey = Object.keys(cityMap).find(k => name.toLowerCase().includes(k.toLowerCase())) || name.split(' ')[0];
+                            const info = cityMap[lookupKey] || { city: name, country: '', code: '', unicode: '' };
+                            
+                            // 标题大小写转换函数
+                            const toTitleCase = (str: string) => {
+                              if (!str) return '';
+                              return str.toLowerCase().split(' ').map(word => {
+                                return word.charAt(0).toUpperCase() + word.slice(1);
+                              }).join(' ');
+                            };
+
+                            const portName = toTitleCase(info.portName || name);
+                            const cityName = toTitleCase(info.city);
+                            
+                            return { 
+                              port: portName, 
+                              city: cityName, 
+                              country: info.country, 
+                              countryCode: info.code,
+                              unicode: info.unicode || info.code
+                            };
+                        };
+
+                        const polInfo = getPortInfo(item.pol || item.departurePort);
+                        const podInfo = getPortInfo(item.pod || item.dischargePort);
+                        
+                        return (
+                          <div className="w-full flex flex-col items-center">
+                            {/* 同一行：4个ETD/ETA卡片 + 航程 */}
+                            <div className="w-full relative mb-3" style={{ height: '50px' }}>
+                                {/* ETD above Receipt (3% position) */}
+                                <div className="absolute left-[3%] transform -translate-x-1/2 flex flex-col items-center bg-blue-50 px-3 py-1.5 rounded border border-blue-100" style={{ minWidth: '70px', whiteSpace: 'nowrap' }}>
+                                  <span className="text-xs text-blue-600 mb-0.5">ETD</span>
+                                  <span className="font-bold text-base text-blue-700 whitespace-nowrap">{item.etd?.substring(5)}</span>
+                                </div>
+                                
+                                {/* ETD above POL (28% position) */}
+                                <div className="absolute left-[28%] transform -translate-x-1/2 flex flex-col items-center bg-blue-50 px-3 py-1.5 rounded border border-blue-100" style={{ minWidth: '70px', whiteSpace: 'nowrap' }}>
+                                  <span className="text-xs text-blue-600 mb-0.5">ETD</span>
+                                  <span className="font-bold text-base text-blue-700 whitespace-nowrap">{item.etd?.substring(5)}</span>
+                                </div>
+                                
+                                {/* 航程 - 居中 */}
+                                <div className="absolute left-1/2 transform -translate-x-1/2 flex flex-col items-center">
+                                  <span className="text-gray-500 text-xs mb-0.5">航程</span>
+                                  <span className="font-bold text-base text-gray-700">{item.transitTime} 天</span>
+                                </div>
+                                
+                                {/* ETA above POD (72% position) */}
+                                <div className="absolute left-[72%] transform -translate-x-1/2 flex flex-col items-center bg-blue-50 px-3 py-1.5 rounded border border-blue-100" style={{ minWidth: '70px', whiteSpace: 'nowrap' }}>
+                                  <span className="text-xs text-blue-600 mb-0.5">ETA</span>
+                                  <span className="font-bold text-base text-blue-700 whitespace-nowrap">{item.eta?.substring(5)}</span>
+                                </div>
+                                
+                                {/* ETA above Delivery (97% position) */}
+                                <div className="absolute left-[97%] transform -translate-x-1/2 flex flex-col items-center bg-blue-50 px-3 py-1.5 rounded border border-blue-100" style={{ minWidth: '70px', whiteSpace: 'nowrap' }}>
+                                  <span className="text-xs text-blue-600 mb-0.5">ETA</span>
+                                  <span className="font-bold text-base text-blue-700 whitespace-nowrap">{item.eta?.substring(5)}</span>
+                                </div>
+                            </div>
+
+                            {/* Timeline Graphic */}
+                            <div className="relative w-full h-8 mb-2 flex items-center justify-center">
+                                {/* Base Line */}
+                                <div className="absolute w-[94%] h-[1px] bg-gray-300 top-1/2 transform -translate-y-1/2 z-0"></div>
+
+                                {/* Node 1: Receipt (City Icon) */}
+                                <div className="absolute left-[3%] top-1/2 transform -translate-x-1/2 -translate-y-1/2 z-10 bg-white p-0.5">
+                                    <Tooltip content={`${polInfo.city}, ${polInfo.country} (${polInfo.countryCode})`}>
+                                        <div className="flex items-center justify-center w-6 h-6 rounded-full border border-green-300 bg-white text-green-500 cursor-pointer hover:scale-125 transition-transform">
+                                            <CitySvg />
+                                        </div>
+                                    </Tooltip>
+                                </div>
+                                
+                                {/* Node 2: POL (Anchor Icon) */}
+                                <div className="absolute left-[28%] top-1/2 transform -translate-x-1/2 -translate-y-1/2 z-10 bg-white p-0.5">
+                                    <Tooltip content={`${polInfo.city} (${polInfo.unicode})`}>
+                                        <div className="flex items-center justify-center w-6 h-6 rounded-full border border-green-500 bg-white text-green-600 cursor-pointer hover:scale-125 transition-transform">
+                                            <AnchorSvg />
+                                        </div>
+                                    </Tooltip>
+                                </div>
+
+                                {/* Center Button */}
+                                <div className="absolute left-1/2 transform -translate-x-1/2 top-1/2 -translate-y-1/2 z-20 bg-white px-2">
+                                    <Button 
+                                      size="mini"
+                                      className={`px-3 py-0 h-6 text-xs rounded-full border shadow-sm hover:shadow-md transition-shadow ${item.transitType === '直达' ? 'text-green-600 border-green-200 bg-green-50' : 'text-orange-600 border-orange-200 bg-orange-50'}`}
+                                      onClick={(e) => {
+                                          e.stopPropagation();
+                                          setCurrentRateDetail(item);
+                                          setRateDetailInitialTab('schedule');
+                                          setRateDetailModalVisible(true);
+                                      }}
+                                    >
+                                      {item.transitType}
+                                    </Button>
+                                </div>
+
+                                {/* Node 3: POD (Anchor Icon) */}
+                                <div className="absolute left-[72%] top-1/2 transform -translate-x-1/2 -translate-y-1/2 z-10 bg-white p-0.5">
+                                    <Tooltip content={`${podInfo.city} (${podInfo.unicode})`}>
+                                        <div className="flex items-center justify-center w-6 h-6 rounded-full border border-orange-500 bg-white text-orange-600 cursor-pointer hover:scale-125 transition-transform">
+                                            <AnchorSvg />
+                                        </div>
+                                    </Tooltip>
+                                </div>
+                                
+                                {/* Node 4: Delivery (City Icon) */}
+                                <div className="absolute left-[97%] top-1/2 transform -translate-x-1/2 -translate-y-1/2 z-10 bg-white p-0.5">
+                                    <Tooltip content={`${podInfo.city}, ${podInfo.country} (${podInfo.countryCode})`}>
+                                        <div className="flex items-center justify-center w-6 h-6 rounded-full border border-orange-300 bg-white text-orange-500 cursor-pointer hover:scale-125 transition-transform">
+                                            <CitySvg />
+                                        </div>
+                                    </Tooltip>
+                                </div>
+                            </div>
+                            
+                            {/* Bottom Text: Port/City Names */}
+                            <div className="w-full relative h-6 text-xs text-gray-600">
+                                {/* Node 1 Text: Receipt */}
+                                <div className="absolute left-[3%] w-[20%] text-center transform -translate-x-1/2 truncate text-base text-gray-800" title={polInfo.city}>
+                                    {polInfo.city}
+                                </div>
+                                
+                                {/* Node 2 Text: POL */}
+                                <div className="absolute left-[28%] w-[20%] text-center transform -translate-x-1/2 truncate text-base text-gray-800" title={polInfo.city}>
+                                    {polInfo.city}
+                                </div>
+
+                                {/* Node 3 Text: POD */}
+                                <div className="absolute left-[72%] w-[20%] text-center transform -translate-x-1/2 truncate text-base text-gray-800" title={podInfo.city}>
+                                    {podInfo.city}
+                                </div>
+                                
+                                {/* Node 4 Text: Delivery */}
+                                <div className="absolute left-[97%] w-[20%] text-center transform -translate-x-1/2 truncate text-base text-gray-800" title={podInfo.city}>
+                                    {podInfo.city}
+                                </div>
+                            </div>
+                          </div>
+                        );
+                    })()}
+                 </div>
+                 
+                 {/* Container Prices Grid with Base/Total Labels */}
+                  <div className="flex-1 flex items-start justify-center space-x-2 px-4">
+                     {/* Base/Total Labels Column */}
+                     <div className="flex flex-col justify-center space-y-2 pt-6">
+                        {priceDisplayMode.includes('base') && (
+                          <div className="text-xs font-medium text-red-600 h-7 flex items-center">Base</div>
+                        )}
+                        {priceDisplayMode.includes('total') && (
+                          <div className="text-xs font-medium text-[#1e3a8a] h-7 flex items-center">Total</div>
+                        )}
+                     </div>
+                     
+                     {/* Container Price Cards */}
+                     <div className="flex space-x-2">
+                       {['20gp', '40gp', '40hc', '45hc'].map(type => {
+                          // For mock data purposes, ensure we display prices even if not explicitly in data for some items
+                          // In real app, this would be handled by data completeness or fallback
+                          const basePrice = item[type] || (type === '20gp' ? 1500 : type === '40gp' ? 2800 : type === '40hc' ? 3130 : 3500);
+                          // Calculate Total Price (Base + (Total - Base of main type))
+                          // Assuming surcharge diff is constant for simplicity in this mock
+                          const diff = (item.totalPrice || 0) - (item.basePrice || 0);
+                          const totalPrice = basePrice + (diff > 0 ? diff : 0);
+
+                          return (
+                            <div key={type} className="flex flex-col items-center justify-center bg-gray-50 rounded px-3 py-2 min-w-[80px]">
+                               <span className="text-xs text-gray-500 font-medium mb-1 uppercase">{type.replace('gp', 'GP').replace('hc', 'HC').replace('nor', 'NOR')}</span>
+                               {priceDisplayMode.includes('base') && (
+                                  <div className="flex items-center space-x-1 h-7">
+                                    <span className="text-xs text-gray-500">$</span>
+                                    <span className="text-lg font-bold text-red-600">{basePrice}</span>
+                                  </div>
+                               )}
+                               {priceDisplayMode.includes('total') && (
+                                  <div className="flex items-center space-x-1 h-7">
+                                    <span className="text-xs text-gray-500">$</span>
+                                    <span className="text-lg font-bold text-[#1e3a8a]">{totalPrice}</span>
+                                  </div>
+                               )}
+                            </div>
+                          );
+                       })}
+                     </div>
+                  </div>
+
+                 {/* Price & Operations (Right Panel) */}
+                  <div className="flex flex-col items-end pl-6 border-l border-gray-100 ml-4 min-w-[240px]">
+                     <div className="flex items-center justify-end w-full mb-3 h-6">
+                        {/* Space Status moved to top left, so nothing here */}
+                     </div>
+                     
+                     <div className="flex items-center justify-end w-full mb-3">
+                        {/* Price Trend on the left of prices */}
+                        <div className="mr-4">
+                             <span 
+                               className="text-sm text-green-600 flex items-center bg-green-100 px-3 py-1.5 rounded cursor-pointer hover:bg-green-200 transition-colors font-medium"
+                               onClick={() => handleViewRateTrend(item)}
+                             >
+                                  <span className="mr-1">↗</span> 价格趋势
+                             </span>
+                        </div>
+                        
+                        {/* Right side Total/Base labels removed as requested */}
+                     </div>
+                     
+                     <div className="flex space-x-2 w-full justify-end">
+                         <Button type="primary" status="success" className="px-4" onClick={() => handleViewRateDetail(item)}>费用明细</Button>
+                         <Button type="primary" status="warning" className="px-4" onClick={() => handleQuickQuote(item)}>快速报价</Button>
+                         <Button type="primary" style={{ background: 'linear-gradient(to right, #3B82F6, #7C3AED)', border: 'none' }} className="px-4" icon={<IconRobot />} onClick={() => handleSingleRateAnalysis(item)}>AI分析</Button>
+                      </div>
+                  </div>
+              </div>
+              
+              {/* Footer Info */}
+              <div className="mt-4 pt-3 border-t border-dashed border-gray-200 flex justify-between text-xs text-gray-400">
+                 <div className="space-x-4">
+                    <span>船名/航次: {item.vesselName}/{item.voyageNo}</span>
+                    <span className="inline-flex items-center">
+                      航线代码: 
+                      <PortsOfCallPopover 
+                        routeCode={item.routeCode || '-'} 
+                        ports={item.portsOfCall || []}
+                        triggerElement={
+                          <span className="ml-1 text-blue-600 font-bold cursor-pointer hover:underline">{item.routeCode}</span>
+                        }
+                      />
+                    </span>
+                 </div>
+                 <div className="flex items-center space-x-4">
+                    {/* 更新时间已移动到左上角 */}
+                 </div>
+              </div>
+            </Card>
+          ))}
+        </div>
+      );
+    }
+
     return (
       <div className="space-y-4 mt-4">
         {data.map((item, index) => (
@@ -1002,18 +2639,18 @@ const RateQuery: React.FC = () => {
             <div className="absolute top-3 left-3 z-10">
               <Checkbox
                 checked={selectedRowKeys.includes(item.key)}
-                onChange={(checked) => {
-                  if (checked) {
-                    setSelectedRowKeys([...selectedRowKeys, item.key]);
-                  } else {
-                    setSelectedRowKeys(selectedRowKeys.filter(key => key !== item.key));
-                  }
-                }}
+                onChange={(checked) => handleRowSelect(item.key, checked)}
               />
             </div>
             {/* 运价号、运价类型标签和直达/中转标签 */}
             <div className="absolute top-3 left-12 z-10 flex items-center space-x-2">
-              <span className="text-xs text-gray-500">{item.routeCode}</span>
+              <PortsOfCallPopover 
+                routeCode={item.routeCode || '-'} 
+                ports={item.portsOfCall || []}
+                triggerElement={
+                  <span className="text-xs text-blue-600 font-bold cursor-pointer hover:underline">{item.routeCode}</span>
+                }
+              />
               <div className={`px-2 py-1 text-xs text-white font-medium rounded ${
                 item.rateType === '合约价' ? 'bg-blue-500' : 'bg-orange-500'
               }`}>
@@ -1049,7 +2686,7 @@ const RateQuery: React.FC = () => {
               {item.priceStatus && (
                 <span 
                   className="text-xs px-2 py-1 bg-blue-100 text-blue-600 rounded text-center cursor-pointer hover:bg-blue-200 transition-colors"
-                  onClick={() => handleViewRateTrend()}
+                  onClick={() => handleViewRateTrend(item)}
                 >
                   {item.priceStatus}
                 </span>
@@ -1097,7 +2734,14 @@ const RateQuery: React.FC = () => {
               </div>
               
               {/* 船期信息 */}
-              <div className="flex-shrink-0 mx-2">
+              <div 
+                className="flex-shrink-0 mx-2 cursor-pointer hover:bg-blue-100 transition-colors rounded-lg"
+                onClick={() => {
+                  setCurrentRateDetail(item);
+                  setRateDetailInitialTab('schedule');
+                  setRateDetailModalVisible(true);
+                }}
+              >
                 <div className="text-center bg-blue-50 p-2 rounded-lg border border-blue-200">
                   <div className="text-xs text-gray-500 mb-1">船期</div>
                   <div className="text-sm font-medium text-blue-600">
@@ -1161,6 +2805,16 @@ const RateQuery: React.FC = () => {
                 </div>
                 <div className="flex items-center space-x-1">
                   <Button 
+                    type="outline" 
+                    size="mini"
+                    style={{ borderColor: '#722ED1', color: '#722ED1' }}
+                    onClick={() => handleSingleRateAnalysis(item)}
+                  >
+                    AI分析
+                  </Button>
+                </div>
+                <div className="flex items-center space-x-1">
+                  <Button 
                     type="primary" 
                     size="mini"
                     onClick={() => handleBookingNow(item.key)}
@@ -1190,7 +2844,13 @@ const RateQuery: React.FC = () => {
                 </div>
                 <div>
                   <span className="text-gray-500">航线代码:</span>
-                  <span className="ml-2 text-gray-700">{item.routeCode || 'AE7'}</span>
+                  <PortsOfCallPopover 
+                    routeCode={item.routeCode || 'AE7'} 
+                    ports={item.portsOfCall || []}
+                    triggerElement={
+                      <span className="ml-2 text-blue-600 font-bold cursor-pointer hover:underline">{item.routeCode || 'AE7'}</span>
+                    }
+                  />
                 </div>
                 <div>
                   <span className="text-gray-500">免用箱:</span>
@@ -1831,6 +3491,9 @@ const RateQuery: React.FC = () => {
           <Button type="text" size="mini" onClick={() => handleViewFclRate(record.key)}>
             详情
           </Button>
+          <Button type="text" size="mini" onClick={() => handleSingleRateAnalysis(record)}>
+            AI分析
+          </Button>
           <Button type="text" size="mini" onClick={handleViewAvailableSailings}>
             可用船期
           </Button>
@@ -2198,7 +3861,12 @@ const RateQuery: React.FC = () => {
   const handleViewRateDetail = (record: any) => {
     // 根据当前tab类型导航到对应的详情页面
     const currentPath = location.pathname;
-    if (activeTab === 'fcl') {
+    
+    if (activeTab === 'ecommerce') {
+      setCurrentRateDetail(record);
+      setRateDetailInitialTab('cost');
+      setRateDetailModalVisible(true);
+    } else if (activeTab === 'fcl') {
       if (currentPath.includes('/controltower-client/')) {
         navigate(`/controltower-client/view-fcl-rate/${record.key}`);
       } else {
@@ -2830,26 +4498,65 @@ const RateQuery: React.FC = () => {
     },
   ];
 
-  // 获取表格数据
-  const getTableData = (): any => {
-    switch (activeTab) {
-      case 'lcl':
-        return lclData;
-      case 'air':
-        return airData;
-      case 'precarriage':
-        return precarriageData;
-      case 'oncarriage':
-        return oncarriageData;
-      case 'fcl':
-      default:
-        return fclData;
-    }
-  };
-
   // 获取表格列
   const getTableColumns = (): any => {
     switch (activeTab) {
+      case 'ecommerce':
+        // Filter and sort ecommerce columns
+        const { visible, order } = ecommerceColumnSettings;
+        
+        // Ensure all keys in order exist in ALL_ECOMMERCE_COLUMNS
+        const availableColumns = ALL_ECOMMERCE_COLUMNS.filter(col => visible[col.dataIndex as keyof typeof visible]);
+        
+        // Sort according to order
+        const sortedColumns = availableColumns.sort((a, b) => {
+          const indexA = order.indexOf(a.dataIndex);
+          const indexB = order.indexOf(b.dataIndex);
+          if (indexA === -1) return 1;
+          if (indexB === -1) return -1;
+          return indexA - indexB;
+        });
+
+        // Override render for transitType to allow opening schedule detail
+        const columnsWithActions = sortedColumns.map(col => {
+          if (col.dataIndex === 'transitType') {
+            return {
+              ...col,
+              render: (val: string, record: any) => (
+                <span 
+                  className="cursor-pointer text-blue-600 hover:text-blue-800 hover:underline"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setCurrentRateDetail(record);
+                    setRateDetailInitialTab('schedule');
+                    setRateDetailModalVisible(true);
+                  }}
+                >
+                  {val}
+                </span>
+              )
+            };
+          }
+          return col;
+        });
+
+        // Add Operations column
+        return [
+          ...columnsWithActions,
+          {
+            title: '操作',
+            dataIndex: 'operations',
+            fixed: 'right',
+            width: 160,
+            render: (_: any, record: EcommerceRateItem) => (
+              <Space size={4}>
+                 <Button type="text" size="mini" style={{ padding: '0 4px' }} onClick={() => handleViewRateDetail(record)}>详情</Button>
+                 <Button type="text" size="mini" style={{ padding: '0 4px' }} onClick={() => handleQuickQuote(record)}>快速报价</Button>
+                 <Button type="text" size="mini" style={{ padding: '0 4px' }} onClick={() => handleSingleRateAnalysis(record)}>AI分析</Button>
+              </Space>
+            )
+          }
+        ];
       case 'lcl':
         return lclAirColumns;
       case 'air':
@@ -2906,6 +4613,23 @@ const RateQuery: React.FC = () => {
   };
 
   const handleDragEnd = () => {
+    setDraggedItem(null);
+    setDragOverItem(null);
+  };
+
+  const handleEcommerceDrop = (e: React.DragEvent, targetColumnKey: string) => {
+    e.preventDefault();
+    if (draggedItem && draggedItem !== targetColumnKey) {
+      const newOrder = [...ecommerceColumnSettings.order];
+      const draggedIndex = newOrder.indexOf(draggedItem);
+      const targetIndex = newOrder.indexOf(targetColumnKey);
+      
+      if (draggedIndex > -1 && targetIndex > -1) {
+        newOrder.splice(draggedIndex, 1);
+        newOrder.splice(targetIndex, 0, draggedItem);
+        setEcommerceColumnSettings(prev => ({ ...prev, order: newOrder }));
+      }
+    }
     setDraggedItem(null);
     setDragOverItem(null);
   };
@@ -2995,6 +4719,17 @@ const RateQuery: React.FC = () => {
   // 初始化默认筛选条件
   const initializeDefaultConditions = (activeTab: string): FilterCondition[] => {
     const filterFields = getFilterFieldsByTab(activeTab);
+    
+    // 电商运价默认显示字段
+    if (activeTab === 'ecommerce') {
+      return filterFields.map(field => ({
+        key: field.key,
+        mode: FilterMode.EQUAL,
+        value: field.key === 'carrier' && field.options ? field.options.map(o => o.value) : '',
+        visible: ['pol', 'pod', 'boxType', 'carrier', 'etd', 'eta'].includes(field.key)
+      }));
+    }
+
     return filterFields.map(field => ({
       key: field.key,
       mode: FilterMode.EQUAL,
@@ -3136,19 +4871,6 @@ const RateQuery: React.FC = () => {
           {/* 字段标签和筛选模式 */}
           <div className="filter-label-row mb-2 flex items-center justify-between">
             <span className="text-gray-700 text-sm font-medium">{fieldConfig.label}</span>
-            <Select
-              value={condition.mode}
-              onChange={handleModeChange}
-              style={{ width: '90px' }}
-              size="mini"
-              className="filter-mode-select"
-            >
-              {FilterModeOptions.map(option => (
-                <Option key={option.value} value={option.value}>
-                  {option.label}
-                </Option>
-              ))}
-            </Select>
           </div>
           
           {/* 输入控件 - 占满整个宽度 */}
@@ -3165,18 +4887,76 @@ const RateQuery: React.FC = () => {
             )}
             {fieldConfig.type === 'select' && (
               <Select
+                mode={fieldConfig.mode}
                 placeholder={isInputDisabled ? '（自动判断）' : fieldConfig.placeholder}
                 value={condition.value}
                 onChange={handleValueChange}
                 disabled={isInputDisabled}
                 allowClear
                 style={{ width: '100%' }}
+                maxTagCount={3} // 超过3个省略
+                showSearch={['pol', 'pod'].includes(condition.key)} // 仅起运港和目的港支持搜索
+                filterOption={(inputValue, option) => {
+                  const label = (option as any)?.props?.children?.toString() || '';
+                  const value = (option as any)?.props?.value?.toString() || '';
+                  return label.toLowerCase().includes(inputValue.toLowerCase()) || 
+                         value.toLowerCase().includes(inputValue.toLowerCase());
+                }}
+                dropdownRender={(menu) => {
+                  // 为箱型和船公司添加全选按钮
+                  if (['boxType', 'carrier', 'shipCompany'].includes(condition.key)) {
+                    const allValues = fieldConfig.options?.map(o => o.value) || [];
+                    const selectedValues = Array.isArray(condition.value) ? condition.value : [];
+                    const isAllSelected = allValues.length > 0 && selectedValues.length === allValues.length;
+                    
+                    return (
+                      <div>
+                         <div style={{ padding: '8px 12px', borderBottom: '1px solid #e5e6eb' }}>
+                           <Checkbox 
+                             checked={isAllSelected} 
+                             onChange={(checked) => {
+                               handleValueChange(checked ? allValues : []);
+                             }}
+                           >
+                             全选
+                           </Checkbox>
+                         </div>
+                         {menu}
+                      </div>
+                    );
+                  }
+                  return menu;
+                }}
               >
-                {fieldConfig.options?.map(option => (
-                  <Option key={option.value} value={option.value}>
-                    {option.label}
-                  </Option>
-                ))}
+                {fieldConfig.options?.map(option => {
+                  if (condition.key === 'boxType' && option.value === '20GP') {
+                    return (
+                      <Option key={option.value} value={option.value}>
+                        <div className="flex items-center justify-between w-full">
+                          <span>{option.label}</span>
+                          <div 
+                            onClick={(e) => e.stopPropagation()} 
+                            onMouseDown={(e) => e.stopPropagation()}
+                          >
+                            <Input 
+                              size="mini"
+                              placeholder="请输入" 
+                              suffix="KG" 
+                              style={{ width: 120, marginLeft: 8 }}
+                              value={ecommerceWeight}
+                              onChange={(value) => setEcommerceWeight(value)}
+                            />
+                          </div>
+                        </div>
+                      </Option>
+                    );
+                  }
+                  return (
+                    <Option key={option.value} value={option.value}>
+                      {option.label}
+                    </Option>
+                  );
+                })}
               </Select>
             )}
             {fieldConfig.type === 'dateRange' && (
@@ -3206,6 +4986,161 @@ const RateQuery: React.FC = () => {
 
   // 渲染卡片模式专用筛选区域 - 与船期查询页面样式一致
   const renderCardModeFilterArea = () => {
+    if (activeTab === 'ecommerce') {
+      return (
+        <Card className="search-card" style={{ marginBottom: 24 }}>
+          <Row gutter={24}>
+            <Col span={6}>
+              <div style={{ marginBottom: 8, fontWeight: 'bold' }}>起运港 (POL)</div>
+              <Select
+                placeholder="请输入起运港"
+                showSearch
+                allowClear
+                style={{ width: '100%' }}
+                value={ecommerceOrigin}
+                onChange={setEcommerceOrigin}
+              >
+                 <Option value="SHANGHAI">上海港 Shanghai</Option>
+                 <Option value="NINGBO">宁波港 Ningbo</Option>
+                 <Option value="SHENZHEN">深圳港 Shenzhen</Option>
+                 <Option value="QINGDAO">青岛港 Qingdao</Option>
+              </Select>
+            </Col>
+            <Col span={6}>
+              <div style={{ marginBottom: 8, fontWeight: 'bold' }}>目的港 (POD)</div>
+              <Select
+                placeholder="请输入目的港"
+                showSearch
+                allowClear
+                style={{ width: '100%' }}
+                value={ecommerceDestination}
+                onChange={setEcommerceDestination}
+              >
+                 <Option value="ROTTERDAM">鹿特丹港 Rotterdam</Option>
+                 <Option value="HAMBURG">汉堡港 Hamburg</Option>
+                 <Option value="LOS ANGELES">洛杉矶港 Los Angeles</Option>
+                 <Option value="NEW YORK">纽约港 New York</Option>
+              </Select>
+            </Col>
+            <Col span={6}>
+               <div style={{ marginBottom: 8, fontWeight: 'bold' }}>箱型</div>
+               <Select
+                  mode="multiple"
+                  placeholder="请选择箱型"
+                  value={selectedContainerTypes}
+                  onChange={handleContainerTypeChange}
+                  style={{ width: '100%' }}
+                  maxTagCount={3}
+                  allowClear
+                  dropdownRender={(menu) => {
+                    const allValues = containerTypeOptions.map(o => o.value);
+                    const isAllSelected = allValues.length > 0 && selectedContainerTypes.length === allValues.length;
+                    
+                    return (
+                      <div>
+                         <div style={{ padding: '8px 12px', borderBottom: '1px solid #e5e6eb' }}>
+                           <Checkbox 
+                             checked={isAllSelected} 
+                             onChange={(checked) => {
+                               handleContainerTypeChange(checked ? allValues : []);
+                             }}
+                           >
+                             全选
+                           </Checkbox>
+                         </div>
+                         {menu}
+                      </div>
+                    );
+                  }}
+                >
+                  {containerTypeOptions.map(option => (
+                    <Option key={option.value} value={option.value}>
+                      {option.value === '20GP' ? (
+                        <div className="flex items-center justify-between w-full" onClick={(e) => e.stopPropagation()}>
+                          <span>{option.label}</span>
+                          <Input 
+                            size="mini" 
+                            style={{ width: '100px', marginLeft: '8px' }} 
+                            placeholder="请输入" 
+                            suffix="KG"
+                            onClick={(e) => e.stopPropagation()}
+                          />
+                        </div>
+                      ) : (
+                        option.label
+                      )}
+                    </Option>
+                  ))}
+                </Select>
+            </Col>
+            <Col span={6}>
+               <div style={{ marginBottom: 8, fontWeight: 'bold' }}>船公司</div>
+               <Select
+                  mode="multiple"
+                  placeholder="请选择船公司"
+                  value={selectedShippingCompanies}
+                  onChange={handleShippingCompanyChange}
+                  style={{ width: '100%' }}
+                  maxTagCount={3}
+                  allowClear
+                  dropdownRender={(menu) => {
+                    const allValues = shippingCompanyOptions.map(o => o.value);
+                    const isAllSelected = allValues.length > 0 && selectedShippingCompanies.length === allValues.length;
+                    
+                    return (
+                      <div>
+                         <div style={{ padding: '8px 12px', borderBottom: '1px solid #e5e6eb' }}>
+                           <Checkbox 
+                             checked={isAllSelected} 
+                             onChange={(checked) => {
+                               handleShippingCompanyChange(checked ? allValues : []);
+                             }}
+                           >
+                             全选
+                           </Checkbox>
+                         </div>
+                         {menu}
+                      </div>
+                    );
+                  }}
+                >
+                  {shippingCompanyOptions.map(option => (
+                    <Option key={option.value} value={option.value}>
+                      {option.label}
+                    </Option>
+                  ))}
+                </Select>
+            </Col>
+          </Row>
+          <Row gutter={24} style={{ marginTop: 16 }}>
+             <Col span={24} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <Space>
+                  <Button 
+                    type="primary"
+                    status="success"
+                    icon={<IconTrophy />} 
+                    onClick={() => navigate('/controltower/freight-rate-ranking')}
+                  >
+                    运价榜单
+                  </Button>
+                  <Button 
+                    type="primary"
+                    style={{ background: 'linear-gradient(to right, #3B82F6, #7C3AED)', border: 'none' }}
+                    icon={<IconRobot />} 
+                    onClick={handleAiAnalysis}
+                  >
+                    AI分析
+                  </Button>
+                </Space>
+                <Space>
+                  <Button type="primary" icon={<IconSearch />} onClick={handleEcommerceSearch} loading={isSearching}>查询</Button>
+                  <Button icon={<IconRefresh />}>重置</Button>
+                </Space>
+             </Col>
+          </Row>
+        </Card>
+      );
+    }
 
     const handleRecentSearchClick = (search: any) => {
       // 这里可以添加自动填充逻辑
@@ -3230,17 +5165,17 @@ const RateQuery: React.FC = () => {
                        value.toLowerCase().includes(inputValue.toLowerCase());
               }}
             >
-              <Option value="CNSHA">上海港 Shanghai</Option>
-              <Option value="CNNGB">宁波港 Ningbo</Option>
-              <Option value="CNSZX">深圳港 Shenzhen</Option>
-              <Option value="CNYTN">烟台港 Yantian</Option>
-              <Option value="CNQIN">青岛港 Qingdao</Option>
-              <Option value="SGSIN">新加坡港 Singapore</Option>
-              <Option value="DEHAM">汉堡港 Hamburg</Option>
-              <Option value="NLRTM">鹿特丹港 Rotterdam</Option>
-              <Option value="USLAX">洛杉矶港 Los Angeles</Option>
-              <Option value="USOAK">奥克兰港 Oakland</Option>
-              <Option value="GBFXT">费力克斯托港 Felixstowe</Option>
+              <Option value="CNSHA">上海港 Shanghai (CNSHA)</Option>
+              <Option value="CNNGB">宁波港 Ningbo (CNNGB)</Option>
+              <Option value="CNSZX">深圳港 Shenzhen (CNSZX)</Option>
+              <Option value="CNYTN">烟台港 Yantian (CNYTN)</Option>
+              <Option value="CNQIN">青岛港 Qingdao (CNQIN)</Option>
+              <Option value="SGSIN">新加坡港 Singapore (SGSIN)</Option>
+              <Option value="DEHAM">汉堡港 Hamburg (DEHAM)</Option>
+              <Option value="NLRTM">鹿特丹港 Rotterdam (NLRTM)</Option>
+              <Option value="USLAX">洛杉矶港 Los Angeles (USLAX)</Option>
+              <Option value="USOAK">奥克兰港 Oakland (USOAK)</Option>
+              <Option value="GBFXT">费力克斯托港 Felixstowe (GBFXT)</Option>
             </Select>
           </Col>
           
@@ -3259,17 +5194,17 @@ const RateQuery: React.FC = () => {
                        value.toLowerCase().includes(inputValue.toLowerCase());
               }}
             >
-              <Option value="CNSHA">上海港 Shanghai</Option>
-              <Option value="CNNGB">宁波港 Ningbo</Option>
-              <Option value="CNSZX">深圳港 Shenzhen</Option>
-              <Option value="CNYTN">烟台港 Yantian</Option>
-              <Option value="CNQIN">青岛港 Qingdao</Option>
-              <Option value="SGSIN">新加坡港 Singapore</Option>
-              <Option value="DEHAM">汉堡港 Hamburg</Option>
-              <Option value="NLRTM">鹿特丹港 Rotterdam</Option>
-              <Option value="USLAX">洛杉矶港 Los Angeles</Option>
-              <Option value="USOAK">奥克兰港 Oakland</Option>
-              <Option value="GBFXT">费力克斯托港 Felixstowe</Option>
+              <Option value="CNSHA">上海港 Shanghai (CNSHA)</Option>
+              <Option value="CNNGB">宁波港 Ningbo (CNNGB)</Option>
+              <Option value="CNSZX">深圳港 Shenzhen (CNSZX)</Option>
+              <Option value="CNYTN">烟台港 Yantian (CNYTN)</Option>
+              <Option value="CNQIN">青岛港 Qingdao (CNQIN)</Option>
+              <Option value="SGSIN">新加坡港 Singapore (SGSIN)</Option>
+              <Option value="DEHAM">汉堡港 Hamburg (DEHAM)</Option>
+              <Option value="NLRTM">鹿特丹港 Rotterdam (NLRTM)</Option>
+              <Option value="USLAX">洛杉矶港 Los Angeles (USLAX)</Option>
+              <Option value="USOAK">奥克兰港 Oakland (USOAK)</Option>
+              <Option value="GBFXT">费力克斯托港 Felixstowe (GBFXT)</Option>
             </Select>
           </Col>
 
@@ -3335,6 +5270,29 @@ const RateQuery: React.FC = () => {
           </Col>
         </Row>
 
+        <Row gutter={24} style={{ marginTop: 16 }}>
+           <Col span={24}>
+              <Space>
+                <Button 
+                  type="primary"
+                  status="success"
+                  icon={<IconTrophy />} 
+                  onClick={() => navigate('/controltower/freight-rate-ranking')}
+                >
+                  运价榜单
+                </Button>
+                <Button 
+                  type="primary"
+                  style={{ background: 'linear-gradient(to right, #3B82F6, #7C3AED)', border: 'none' }}
+                  icon={<IconRobot />} 
+                  onClick={handleAiAnalysis}
+                >
+                  AI分析
+                </Button>
+              </Space>
+           </Col>
+        </Row>
+
         {/* 最近搜索区域 */}
         <div style={{ marginTop: 24, borderTop: '1px solid #f0f0f0', paddingTop: 16 }}>
           <div style={{ marginBottom: 12 }}>
@@ -3362,84 +5320,68 @@ const RateQuery: React.FC = () => {
     );
   };
 
+  // 通用查询处理
+  const handleSearch = () => {
+    if (activeTab === 'ecommerce') {
+      handleEcommerceSearch();
+    } else {
+      Message.info('查询功能仅在电商运价Tab演示');
+    }
+  };
+
   // 渲染列表模式筛选区域
   const renderListModeFilterArea = () => {
-    const conditionsToShow = filterExpanded ? getVisibleConditions() : getFirstRowConditions();
+    // 始终显示所有可见的筛选条件
+    const conditionsToShow = getVisibleConditions();
     
     return (
       <Card className="mb-4 filter-area-card">
-        {/* 筛选区头部 - 标题和所有操作按钮在同一行 */}
-        <div className="filter-header flex justify-between items-center mb-6">
-          <Title heading={6} className="!mb-0 !text-gray-800">
-            筛选条件
-          </Title>
-          <div className="flex items-center gap-3">
-            {/* 选择方案下拉 */}
-            <div className="flex items-center gap-2">
-              <span className="text-gray-500 text-sm">方案:</span>
-              <SchemeSelect
-                value={currentSchemeId}
-                onChange={applyFilterScheme}
-                schemes={allSchemes}
-                onSchemeManagement={openSchemeManagementModal}
-                placeholder="选择方案"
-                style={{ width: '180px' }}
-                size="small"
-              />
-            </div>
-            
-            {/* 所有操作按钮 */}
-            <Space size="medium">
-              <Button 
-                type="primary" 
-                icon={<IconSearch />}
-                className="search-btn"
-                size="small"
-              >
-                查询
-              </Button>
-              <Button 
-                icon={<IconRefresh />} 
-                onClick={resetFilterConditions}
-                className="reset-btn"
-                size="small"
-              >
-                重置
-              </Button>
-              <Button 
-                type="outline"
-                icon={<IconSettings />} 
-                onClick={openFilterFieldModal}
-                className="settings-btn"
-                size="small"
-              >
-                增减条件
-              </Button>
-              <Button 
-                type="outline"
-                onClick={openSchemeModal}
-                className="save-scheme-btn"
-                size="small"
-              >
-                另存为方案
-              </Button>
-              <Button 
-                type="text" 
-                icon={filterExpanded ? <IconUp /> : <IconDown />}
-                onClick={toggleFilterExpanded}
-                className="expand-btn text-blue-500 hover:text-blue-700"
-                size="small"
-              >
-                {filterExpanded ? '收起' : '展开'}
-              </Button>
-            </Space>
-          </div>
-        </div>
-        
         {/* 筛选条件网格 - 直接放置，无额外包装 */}
         <Row gutter={[20, 20]}>
           {conditionsToShow.map((condition) => renderFilterCondition(condition))}
         </Row>
+        
+        {/* 操作按钮放在右下角 */}
+        <div className="flex justify-between mt-4">
+          <Space>
+            <Button 
+              type="primary"
+              status="success"
+              icon={<IconTrophy />} 
+              onClick={() => navigate('/controltower/freight-rate-ranking')}
+            >
+              运价榜单
+            </Button>
+            <Button 
+              type="primary"
+              style={{ background: 'linear-gradient(to right, #3B82F6, #7C3AED)', border: 'none' }}
+              icon={<IconRobot />} 
+              onClick={handleAiAnalysis}
+            >
+              AI分析
+            </Button>
+          </Space>
+          <Space size="medium">
+            <Button 
+              type="primary" 
+              icon={<IconSearch />}
+              className="search-btn"
+              size="small"
+              onClick={handleSearch}
+              loading={isSearching}
+            >
+              查询
+            </Button>
+            <Button 
+              icon={<IconRefresh />} 
+              onClick={resetFilterConditions}
+              className="reset-btn"
+              size="small"
+            >
+              重置
+            </Button>
+          </Space>
+        </div>
 
         {/* 添加自定义样式 */}
         <style dangerouslySetInnerHTML={{
@@ -3489,14 +5431,113 @@ const RateQuery: React.FC = () => {
               border-color: #3b82f6;
               color: #3b82f6;
             }
-            
-            .expand-btn {
-              font-weight: 500;
-            }
           `
         }} />
       </Card>
     );
+  };
+
+  // 渲染置顶区域
+  const renderPinnedSection = () => {
+    const pinnedData = getPinnedData();
+    if (pinnedData.length === 0) return null;
+
+    const visiblePinnedData = showAllPinned ? pinnedData : pinnedData.slice(0, 10);
+    const hasMore = pinnedData.length > 10;
+
+    // Calculate checkbox state for pinned section
+    const visiblePinnedKeys = visiblePinnedData.map((item: any) => item.key);
+    const selectedPinnedCount = selectedRowKeys.filter(key => visiblePinnedKeys.includes(key)).length;
+    const isPinnedAllSelected = visiblePinnedData.length > 0 && selectedPinnedCount === visiblePinnedData.length;
+    const isPinnedIndeterminate = selectedPinnedCount > 0 && selectedPinnedCount < visiblePinnedData.length;
+
+    // Handle Pinned Select All
+    const handlePinnedSelectAll = (checked: boolean) => {
+      if (checked) {
+        // Add all visible pinned keys to selectedRowKeys, keeping existing non-pinned selections
+        const otherSelected = selectedRowKeys.filter(key => !visiblePinnedKeys.includes(key));
+        const newSelected = Array.from(new Set([...otherSelected, ...visiblePinnedKeys]));
+        setSelectedRowKeys(newSelected);
+      } else {
+        // Remove all visible pinned keys from selectedRowKeys
+        const newSelected = selectedRowKeys.filter(key => !visiblePinnedKeys.includes(key));
+        setSelectedRowKeys(newSelected);
+      }
+    };
+
+    return (
+      <div className="mb-4">
+        <div className="bg-gray-100 p-2 rounded-t flex justify-between items-center border-b border-gray-200">
+           <div className="flex items-center text-gray-700 font-bold">
+              <Checkbox 
+                checked={isPinnedAllSelected} 
+                indeterminate={isPinnedIndeterminate}
+                onChange={handlePinnedSelectAll}
+                className="mr-2"
+              />
+              <IconPushpin className="mr-2 text-blue-600" />
+              <span>置顶运价 ({pinnedData.length})</span>
+           </div>
+           {hasMore && (
+             <Button 
+               type="text" 
+               size="mini" 
+               onClick={() => setShowAllPinned(!showAllPinned)}
+               className="text-blue-600"
+             >
+               {showAllPinned ? '收起置顶运价' : '展开全部置顶运价'}
+             </Button>
+           )}
+        </div>
+        
+        <div className="bg-gray-50 border border-gray-200 rounded-b p-2 overflow-hidden">
+          {viewMode === 'list' ? (
+             <Table
+               rowKey="key"
+               rowSelection={activeTab === 'ecommerce' ? {
+                 type: 'checkbox',
+                 selectedRowKeys,
+                 onSelect: (selected, record) => {
+                    handleRowSelect(record.key, selected);
+                 },
+                 onSelectAll: (selected, selectedRows) => {
+                    const currentTableKeys = visiblePinnedData.map((r: any) => r.key);
+                    if (selected) {
+                       const newSet = new Set([...selectedRowKeys, ...currentTableKeys]);
+                       setSelectedRowKeys(Array.from(newSet));
+                    } else {
+                       const newKeys = selectedRowKeys.filter(k => !currentTableKeys.includes(k));
+                       setSelectedRowKeys(newKeys);
+                    }
+                 }
+               } : undefined}
+               loading={false}
+               columns={getTableColumns()}
+               data={visiblePinnedData}
+               pagination={false}
+               scroll={{ x: 2740 }}
+               border={false}
+               className="inquiry-table-nowrap pinned-table"
+             />
+          ) : (
+             <CardView data={visiblePinnedData} />
+          )}
+        </div>
+      </div>
+    );
+  };
+
+  const getPinButtonText = () => {
+    const pinnedSelected = selectedRowKeys.filter(key => pinnedRateIds.includes(key));
+    const unpinnedSelected = selectedRowKeys.filter(key => !pinnedRateIds.includes(key));
+    
+    if (pinnedSelected.length > 0 && unpinnedSelected.length > 0) {
+      return '置换置顶';
+    } else if (pinnedSelected.length > 0) {
+      return '取消置顶';
+    } else {
+      return '运价置顶';
+    }
   };
 
   return (
@@ -3506,9 +5547,12 @@ const RateQuery: React.FC = () => {
         <Breadcrumb.Item>运价查询</Breadcrumb.Item>
       </Breadcrumb>
     }>
+      {contextHolder}
+      {modalContextHolder}
       <Card>
         <div className="flex justify-between items-center mb-4">
           <Tabs activeTab={activeTab} onChange={handleTabChange} className="flex-1">
+            <TabPane key="ecommerce" title="电商运价" />
             <TabPane key="fcl" title="整箱运价" />
             <TabPane key="lcl" title="拼箱运价" />
             <TabPane key="air" title="空运运价" />
@@ -3541,50 +5585,62 @@ const RateQuery: React.FC = () => {
                   组合方案查询
                 </Button>
               )}
-              <Button icon={<IconDownload />} onClick={handleExportRate}>导出运价</Button>
-              <Button type="primary" icon={<IconSearch />} onClick={handleBatchQuote}>批量报价</Button>
-            </Space>
-            <div className="flex items-center space-x-4">
-              {/* 箱型筛选 - 仅在卡片模式显示 */}
               {viewMode === 'card' && (
-                <div className="flex items-center space-x-2">
-                  <Select
-                    mode="multiple"
-                    placeholder="请选择箱型"
-                    value={selectedContainerTypes}
-                    onChange={handleContainerTypeChange}
-                    style={{ minWidth: '180px' }}
-                    size="small"
-                    maxTagCount={2}
-                    allowClear
+                <div className="flex items-center mr-2">
+                  <Checkbox 
+                    checked={selectAll} 
+                    onChange={handleSelectAll}
                   >
-                    {containerTypeOptions.map(option => (
-                      <Option key={option.value} value={option.value}>
-                        {option.label}
-                      </Option>
-                    ))}
-                  </Select>
+                    全选
+                  </Checkbox>
                 </div>
               )}
-              {/* 船公司筛选 - 仅在卡片模式显示 */}
+              <Button icon={<IconDownload />} onClick={handleExportRate}>导出运价</Button>
+              <Button type="primary" status="warning" icon={<IconPushpin />} onClick={handlePinOperation}>{getPinButtonText()}</Button>
+              <Button 
+                type="primary" 
+                icon={<IconSearch />} 
+                onClick={handleBatchQuote}
+                disabled={selectedRowKeys.length === 0}
+              >
+                快速报价
+              </Button>
+            </Space>
+            <div className="flex items-center space-x-4">
+              {/* ETD/ETA 筛选 - 仅在卡片模式显示 */}
+              {viewMode === 'card' && (
+                <>
+                  <div className="flex items-center space-x-2">
+                    <span className="text-gray-600 text-xs">ETD:</span>
+                    <RangePicker 
+                      style={{ width: 200 }} 
+                      size="small"
+                      value={etdDateRange}
+                      onChange={setEtdDateRange}
+                    />
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <span className="text-gray-600 text-xs">ETA:</span>
+                    <RangePicker 
+                      style={{ width: 200 }} 
+                      size="small"
+                      value={etaDateRange}
+                      onChange={setEtaDateRange}
+                    />
+                  </div>
+                </>
+              )}
+              {/* 价格展示 - 仅在卡片模式显示 */}
               {viewMode === 'card' && (
                 <div className="flex items-center space-x-2">
-                  <Select
-                    mode="multiple"
-                    placeholder="请选择船公司"
-                    value={selectedShippingCompanies}
-                    onChange={handleShippingCompanyChange}
-                    style={{ minWidth: '200px' }}
-                    size="small"
-                    maxTagCount={2}
-                    allowClear
-                  >
-                    {shippingCompanyOptions.map(option => (
-                      <Option key={option.value} value={option.value}>
-                        {option.label}
-                      </Option>
-                    ))}
-                  </Select>
+                  <Checkbox.Group 
+                    value={priceDisplayMode} 
+                    onChange={setPriceDisplayMode}
+                    options={[
+                      { label: 'Base', value: 'base' },
+                      { label: 'Total', value: 'total' }
+                    ]}
+                  />
                 </div>
               )}
               {/* 运输类型筛选 - 仅在卡片模式显示 */}
@@ -3663,7 +5719,7 @@ const RateQuery: React.FC = () => {
                          minWidth: '120px',
                          marginTop: '4px'
                        }}>
-                         {['20GP', '40GP', '40HC', '20 NOR'].map((containerType) => (
+                         {['20GP', '40GP', '40HC', '20NOR', '40NOR', '45HC', '20FR', '40FR', '20OT', '40OT', '20TK', '40TK', '20HC'].map((containerType) => (
                            <div
                              key={containerType}
                              style={{
@@ -3681,12 +5737,8 @@ const RateQuery: React.FC = () => {
                              onClick={() => {
                                setSelectedContainerType(containerType);
                                setShowContainerDropdown(false);
-                               if (sortField === 'cheapest' && selectedContainerType === containerType) {
-                                 setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
-                               } else {
-                                 setSortField('cheapest');
-                                 setSortOrder('asc');
-                               }
+                               setSortField('cheapest');
+                               setSortOrder('asc');
                              }}
                            >
                              {containerType}
@@ -3698,41 +5750,95 @@ const RateQuery: React.FC = () => {
                 </div>
               )}
               {viewMode === 'list' && (
-                <div 
-                  className="flex items-center text-blue-500 cursor-pointer hover:text-blue-700"
-                  onClick={openCustomTableModal}
-                >
-                  <IconList className="mr-1" />
-                  <span>自定义表格</span>
-                </div>
+                <>
+                  <div className="flex items-center mr-2">
+                    <span className="text-gray-600 mr-2 text-xs">ETD:</span>
+                    <RangePicker 
+                      style={{ width: 200 }} 
+                      size="small"
+                      value={etdDateRange}
+                      onChange={setEtdDateRange}
+                    />
+                  </div>
+                  <div className="flex items-center mr-4">
+                    <span className="text-gray-600 mr-2 text-xs">ETA:</span>
+                    <RangePicker 
+                      style={{ width: 200 }} 
+                      size="small"
+                      value={etaDateRange}
+                      onChange={setEtaDateRange}
+                    />
+                  </div>
+                  <div 
+                    className="flex items-center text-blue-500 cursor-pointer hover:text-blue-700"
+                    onClick={openCustomTableModal}
+                  >
+                    <IconList className="mr-1" />
+                    <span>自定义表格</span>
+                  </div>
+                </>
               )}
             </div>
           </div>
-          {viewMode === 'list' ? (
-            <Table
-              rowKey="key"
-              loading={false}
-              columns={getTableColumns()}
-              data={getTableData()}
-              pagination={pagination}
-              scroll={{ x: 2740 }}
-              border={false}
-              className="mt-4 inquiry-table-nowrap"
-            />
+          
+          {activeTab === 'ecommerce' && !hasSearched ? (
+            <div style={{ padding: '80px 0' }}>
+               <Empty
+                 icon={<IconSearch style={{ fontSize: 48, color: 'var(--color-text-3)' }} />}
+                 description="请选择筛选条件并点击【查询】以搜索电商运价"
+               />
+            </div>
           ) : (
             <>
-              <CardView data={getTableData()} />
-              <div className="flex justify-center mt-6">
-                <Pagination
-                  total={pagination.total}
-                  pageSize={pagination.pageSize}
-                  current={pagination.current}
-                  showTotal={pagination.showTotal}
-                  showJumper={pagination.showJumper}
-                  sizeCanChange={pagination.sizeCanChange}
-                  sizeOptions={pagination.sizeOptions}
+              {renderPinnedSection()}
+
+              {viewMode === 'list' ? (
+                <Table
+                  rowKey="key"
+                  rowSelection={activeTab === 'ecommerce' ? {
+                    type: 'checkbox',
+                    selectedRowKeys,
+                    onSelect: (selected, record) => {
+                      handleRowSelect(record.key, selected);
+                    },
+                    onSelectAll: (selected, selectedRows) => {
+                      const currentTableKeys = getUnpinnedData().map((r: any) => r.key);
+                      if (selected) {
+                        // 全选时，保留已选中的置顶项，添加当前列表所有项
+                        const pinnedSelected = selectedRowKeys.filter(key => pinnedRateIds.includes(key));
+                        const newSet = new Set([...pinnedSelected, ...currentTableKeys]);
+                        setSelectedRowKeys(Array.from(newSet));
+                      } else {
+                        // 取消全选时，仅取消当前列表项的选择，保留置顶项
+                        const newKeys = selectedRowKeys.filter(k => !currentTableKeys.includes(k));
+                        setSelectedRowKeys(newKeys);
+                      }
+                    }
+                  } : undefined}
+                  loading={false}
+                  columns={getTableColumns()}
+                  data={getUnpinnedData()}
+                  pagination={pagination}
+                  scroll={{ x: 2740 }}
+                  border={false}
+                  className="mt-4 inquiry-table-nowrap"
                 />
-              </div>
+              ) : (
+                <>
+                  <CardView data={getUnpinnedData()} />
+                  <div className="flex justify-center mt-6">
+                    <Pagination
+                      total={pagination.total}
+                      pageSize={pagination.pageSize}
+                      current={pagination.current}
+                      showTotal={pagination.showTotal}
+                      showJumper={pagination.showJumper}
+                      sizeCanChange={pagination.sizeCanChange}
+                      sizeOptions={pagination.sizeOptions}
+                    />
+                  </div>
+                </>
+              )}
             </>
           )}
           
@@ -3749,9 +5855,15 @@ const RateQuery: React.FC = () => {
                 overflow: visible !important;
                 text-overflow: unset !important;
               }
+              .pinned-table .arco-table-tr .arco-table-td {
+                background-color: #f9fafb !important;
+              }
+              .pinned-table .arco-table-tr:hover .arco-table-td {
+                background-color: #f3f4f6 !important;
+              }
             `
           }} />
-          <div className="mt-2 text-gray-500 text-sm">共 9232 条</div>
+          {(activeTab !== 'ecommerce' || hasSearched) && <div className="mt-2 text-gray-500 text-sm">共 9232 条</div>}
         </Card>
       </Card>
 
@@ -3768,20 +5880,89 @@ const RateQuery: React.FC = () => {
         width={480}
         footer={
           <div className="flex justify-between">
-            <Button onClick={resetColumnVisibility}>
+            <Button onClick={activeTab === 'ecommerce' ? resetEcommerceSettings : resetColumnVisibility}>
               重置默认
             </Button>
             <div>
               <Button onClick={closeCustomTableModal} style={{ marginRight: 8 }}>
                 取消
               </Button>
-              <Button type="primary" onClick={applyColumnSettings}>
+              <Button type="primary" onClick={activeTab === 'ecommerce' ? saveEcommerceSettings : applyColumnSettings}>
                 确认
               </Button>
             </div>
           </div>
         }
       >
+        {activeTab === 'ecommerce' ? (
+          <div className="space-y-4">
+            <div className="bg-gray-50 p-3 space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-gray-600">
+                  已选择 {Object.values(ecommerceColumnSettings.visible).filter(Boolean).length} / {ecommerceColumnSettings.order.length} 个字段
+                </span>
+                <div className="space-x-2">
+                  <Button 
+                    size="small" 
+                    onClick={() => {
+                      const newVisible = { ...ecommerceColumnSettings.visible };
+                      ecommerceColumnSettings.order.forEach(key => newVisible[key] = true);
+                      setEcommerceColumnSettings(prev => ({ ...prev, visible: newVisible }));
+                    }}
+                  >
+                    全选
+                  </Button>
+                  <Button 
+                    size="small" 
+                    onClick={() => {
+                      const newVisible = { ...ecommerceColumnSettings.visible };
+                      ecommerceColumnSettings.order.forEach(key => newVisible[key] = false);
+                      setEcommerceColumnSettings(prev => ({ ...prev, visible: newVisible }));
+                    }}
+                  >
+                    清空
+                  </Button>
+                </div>
+              </div>
+            </div>
+            <div className="space-y-2">
+              {ecommerceColumnSettings.order.map((columnKey, index) => {
+                const column = ALL_ECOMMERCE_COLUMNS.find(c => c.dataIndex === columnKey);
+                return (
+                  <div
+                    key={columnKey}
+                    className={`flex items-center gap-3 p-3 border border-gray-200 bg-white hover:bg-gray-50 transition-colors ${
+                      draggedItem === columnKey ? 'opacity-50' : ''
+                    } ${
+                      dragOverItem === columnKey ? 'border-blue-400 border-2' : ''
+                    }`}
+                    draggable
+                    onDragStart={(e) => handleDragStart(e, columnKey)}
+                    onDragOver={(e) => handleDragOver(e, columnKey)}
+                    onDrop={(e) => handleEcommerceDrop(e, columnKey)}
+                    onDragEnd={handleDragEnd}
+                  >
+                    <IconDragDotVertical className="text-gray-400 cursor-move" />
+                    <div className="flex items-center justify-center w-6 h-5 bg-gray-100 text-xs text-gray-600 font-medium rounded" style={{ minWidth: '24px' }}>
+                      {index + 1}
+                    </div>
+                    <span className="flex-1 text-sm">{column?.title || columnKey}</span>
+                    <Switch
+                      size="small"
+                      checked={ecommerceColumnSettings.visible[columnKey]}
+                      onChange={(checked) => {
+                         setEcommerceColumnSettings(prev => ({
+                           ...prev,
+                           visible: { ...prev.visible, [columnKey]: checked }
+                         }));
+                      }}
+                    />
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        ) : (
         <div className="space-y-4">
           {/* 快捷操作区域 */}
           <div className="bg-gray-50 p-3 space-y-3">
@@ -3848,6 +6029,7 @@ const RateQuery: React.FC = () => {
             ))}
           </div>
         </div>
+        )}
       </Drawer>
 
       {/* 筛选字段抽屉 */}
@@ -3997,14 +6179,22 @@ const RateQuery: React.FC = () => {
       {/* 批量报价弹窗 */}
       <BatchQuoteModal
         visible={batchQuoteModalVisible}
-        onCancel={() => setBatchQuoteModalVisible(false)}
-        selectedItems={selectedRowKeys.map(key => {
+        onCancel={() => {
+          setBatchQuoteModalVisible(false);
+          setQuickQuoteItem(null);
+        }}
+        selectedItems={quickQuoteItem ? [{
+            carrier: quickQuoteItem.shipCompany || quickQuoteItem.carrierName || '',
+            origin: quickQuoteItem.departurePort || quickQuoteItem.pol || '',
+            destination: quickQuoteItem.dischargePort || quickQuoteItem.pod || '',
+            sailingTime: quickQuoteItem.vesselSchedule || quickQuoteItem.etd || ''
+        }] : selectedRowKeys.map(key => {
           const currentData = getTableData();
           const item = currentData.find((d: any) => d.key === key);
           return {
-            carrier: item?.shipCompany || '',
-            origin: item?.departurePort || '',
-            destination: item?.dischargePort || '',
+            carrier: item?.shipCompany || item?.carrierName || '',
+            origin: item?.departurePort || item?.pol || '',
+            destination: item?.dischargePort || item?.pod || '',
             sailingTime: item?.vesselSchedule || item?.etd || ''
           };
         })}
@@ -4020,6 +6210,14 @@ const RateQuery: React.FC = () => {
       <RateTrendModal
         visible={rateTrendModalVisible}
         onCancel={() => setRateTrendModalVisible(false)}
+      />
+
+      {/* 运价详情弹窗 */}
+      <RateDetailModal
+        visible={rateDetailModalVisible}
+        onCancel={() => setRateDetailModalVisible(false)}
+        data={currentRateDetail}
+        initialActiveTab={rateDetailInitialTab}
       />
 
       {/* 导出成功提示弹窗 */}
@@ -4044,6 +6242,11 @@ const RateQuery: React.FC = () => {
           </div>
         </div>
       </Modal>
+      {/* 查询进度浮窗 */}
+      <SearchProgress 
+        visible={isSearching} 
+        progressData={searchProgressData} 
+      />
     </ControlTowerSaasLayout>
   );
 };

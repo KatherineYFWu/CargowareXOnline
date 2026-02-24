@@ -20,6 +20,7 @@ import BCUpload from './pages/BCUpload';
 // 引入控制塔下的超级运价系统组件
 import FclRates from './saas/FclRates';
 import RateQuery from './saas/RateQuery';
+import FreightRateRanking from './saas/FreightRateRanking';
 import LastMileRates from './saas/LastMileRates';
 import InquiryManagementSaas from './saas/InquiryManagement';
 import RouteManagement from './saas/RouteManagement';
@@ -188,6 +189,7 @@ const ControlTowerRoutes: React.FC = () => {
       <Route path="/edi-settings-detail/:id" element={<EdiSettingsDetail />} />
       <Route path="/edi-config/:id" element={<EdiConfig />} />
       <Route path="/template-config" element={<TemplateConfig />} />
+      <Route path="/freight-rate-ranking" element={<FreightRateRanking />} />
       {/* 运价中心相关路由已暂时注释
       <Route path="/freight-rate-query" element={<FreightRateQuery />} />
       <Route path="/inquiry-management" element={<InquiryManagement />} />

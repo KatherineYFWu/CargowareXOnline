@@ -1,15 +1,15 @@
 <template>
   <form @submit.prevent="handleSubmit" class="space-y-4">
-    <!-- 用户名和手机号 -->
+    <!-- Username and Phone Number -->
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
       <div>
-        <label class="block text-gray-700 font-semibold mb-2">用户名</label>
+        <label class="block text-gray-700 font-semibold mb-2">Username</label>
         <div class="relative">
           <i class="fas fa-user absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
           <input
             v-model="registerForm.username"
             type="text"
-            placeholder="请输入用户名"
+            placeholder="Please enter username"
             class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
             required
           />
@@ -17,13 +17,13 @@
       </div>
 
       <div>
-        <label class="block text-gray-700 font-semibold mb-2">手机号</label>
+        <label class="block text-gray-700 font-semibold mb-2">Phone Number</label>
         <div class="relative">
           <i class="fas fa-phone absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
           <input
             v-model="registerForm.phone"
             type="tel"
-            placeholder="请输入手机号"
+            placeholder="Please enter phone number"
             pattern="^1[3-9]\d{9}$"
             class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
             required
@@ -32,14 +32,14 @@
       </div>
     </div>
 
-    <!-- 手机验证码 -->
+    <!-- Phone Verification Code -->
     <div>
-      <label class="block text-gray-700 font-semibold mb-2">手机验证码</label>
+      <label class="block text-gray-700 font-semibold mb-2">Phone Verification Code</label>
       <div class="flex space-x-3">
         <input
           v-model="registerForm.phoneCode"
           type="text"
-          placeholder="请输入验证码"
+          placeholder="Please enter verification code"
           class="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
           required
         />
@@ -49,35 +49,35 @@
           @click="handleSendCode"
           class="px-6 py-3 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors whitespace-nowrap"
         >
-          {{ countdown > 0 ? `${countdown}s` : '发送验证码' }}
+          {{ countdown > 0 ? `${countdown}s` : 'Send Verification Code' }}
         </button>
       </div>
     </div>
 
-    <!-- 邮箱（可选） -->
+    <!-- Email (Optional) -->
     <div>
-      <label class="block text-gray-700 font-semibold mb-2">邮箱（可选）</label>
+      <label class="block text-gray-700 font-semibold mb-2">Email (Optional)</label>
       <div class="relative">
         <i class="fas fa-envelope absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
         <input
           v-model="registerForm.email"
           type="email"
-          placeholder="请输入邮箱（可选）"
+          placeholder="Please enter email (optional)"
           class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
         />
       </div>
     </div>
 
-    <!-- 密码设置 -->
+    <!-- Password Settings -->
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
       <div>
-        <label class="block text-gray-700 font-semibold mb-2">设置密码</label>
+        <label class="block text-gray-700 font-semibold mb-2">Set Password</label>
         <div class="relative">
           <i class="fas fa-lock absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
           <input
             v-model="registerForm.password"
             :type="passwordVisible ? 'text' : 'password'"
-            placeholder="至少6位密码"
+            placeholder="At least 6 characters"
             minlength="6"
             class="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
             required
@@ -93,13 +93,13 @@
       </div>
 
       <div>
-        <label class="block text-gray-700 font-semibold mb-2">确认密码</label>
+        <label class="block text-gray-700 font-semibold mb-2">Confirm Password</label>
         <div class="relative">
           <i class="fas fa-lock absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
           <input
             v-model="registerForm.confirmPassword"
             :type="confirmPasswordVisible ? 'text' : 'password'"
-            placeholder="请再次输入密码"
+            placeholder="Please re-enter password"
             class="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
             required
           />
@@ -114,7 +114,7 @@
       </div>
     </div>
 
-    <!-- 用户协议 -->
+    <!-- User Agreement -->
     <div class="flex items-start">
       <input
         v-model="agreedToTerms"
@@ -124,49 +124,49 @@
         required
       />
       <label for="terms" class="text-sm text-gray-600">
-        我已阅读并同意
+        I have read and agree to the
         <button
           type="button"
           @click="$emit('showAgreement')"
           class="text-blue-600 hover:text-blue-700"
         >
-          《用户协议》
+          User Agreement
         </button>
-        和
+        and
         <button
           type="button"
           @click="$emit('showPrivacy')"
           class="text-blue-600 hover:text-blue-700"
         >
-          《隐私政策》
+          Privacy Policy
         </button>
       </label>
     </div>
 
-    <!-- 注册按钮 -->
+    <!-- Register Button -->
     <button
       type="submit"
       :disabled="loading || !agreedToTerms"
       class="w-full py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg font-semibold hover:from-blue-700 hover:to-blue-800 disabled:opacity-50 transition-all flex items-center justify-center"
     >
       <i v-if="loading" class="fas fa-spinner fa-spin mr-2"></i>
-      {{ loading ? '注册中...' : '立即注册' }}
+      {{ loading ? 'Registering...' : 'Register Now' }}
     </button>
 
-    <!-- 企业用户提示 -->
+    <!-- Corporate User Notice -->
     <div class="mt-6 p-4 bg-blue-50 rounded-lg">
       <div class="flex items-start">
         <i class="fas fa-building text-blue-600 mt-1 mr-3"></i>
         <div>
-          <h4 class="text-sm font-semibold text-gray-800 mb-1">企业用户？</h4>
+          <h4 class="text-sm font-semibold text-gray-800 mb-1">Corporate User?</h4>
           <p class="text-sm text-gray-600">
-            请联系您的企业管理员或
+            Please contact your enterprise administrator or
             <button
               type="button"
               @click="handleStaffAuth"
               class="text-blue-600 hover:text-blue-700 font-medium"
             >
-              使用员工通道登录
+              login via staff channel
             </button>
           </p>
         </div>
@@ -209,61 +209,61 @@ const {
 const router = useRouter()
 const agreedToTerms = ref(false)
 
-// 处理表单提交
+// Handle form submission
 const handleSubmit = async () => {
-  // 验证表单
+  // Validate form
   if (!registerForm.value.username) {
-    alert('请输入用户名')
+    alert('Please enter username')
     return
   }
   
   if (!registerForm.value.phone || !/^1[3-9]\d{9}$/.test(registerForm.value.phone)) {
-    alert('请输入有效的手机号')
+    alert('Please enter a valid phone number')
     return
   }
   
   if (!registerForm.value.phoneCode) {
-    alert('请输入验证码')
+    alert('Please enter verification code')
     return
   }
   
   if (!registerForm.value.password || registerForm.value.password.length < 6) {
-    alert('密码至少6位')
+    alert('Password must be at least 6 characters')
     return
   }
   
   if (registerForm.value.password !== registerForm.value.confirmPassword) {
-    alert('两次输入的密码不一致')
+    alert('Passwords do not match')
     return
   }
   
   if (!agreedToTerms.value) {
-    alert('请同意用户协议和隐私政策')
+    alert('Please agree to the User Agreement and Privacy Policy')
     return
   }
   
   emit('submit', registerForm.value)
 }
 
-// 发送验证码
+// Send verification code
 const handleSendCode = () => {
   if (!registerForm.value.phone) {
-    alert('请先输入手机号')
+    alert('Please enter phone number first')
     return
   }
   
   if (!/^1[3-9]\d{9}$/.test(registerForm.value.phone)) {
-    alert('请输入有效的手机号')
+    alert('Please enter a valid phone number')
     return
   }
   
   startCountdown()
   emit('sendCode')
-  alert('验证码已发送 📱')
+  alert('Verification code sent 📱')
 }
 
 // 跳转到员工登录
 const handleStaffAuth = () => {
   router.push('/staff/auth')
 }
-</script> 
+</script>

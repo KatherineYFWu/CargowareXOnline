@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { Drawer, Button, Input, Dropdown, Menu, Tag } from '@arco-design/web-react';
+import { Drawer, Button, Input, Dropdown, Menu, Tag, Message } from '@arco-design/web-react';
 import { IconSync, IconApps, IconFile, IconAttachment, IconClose, IconSearch, IconUpload, IconMessage, IconMore, IconSend, IconCopy, IconRefresh, IconThumbUp, IconThumbDown } from '@arco-design/web-react/icon';
 import { getSOPByOrderId, OrderSOP } from './sopData';
 import SOPQuery from './SOPQuery';
+import FreightRateAnalysisResult from './FreightRateAnalysisResult';
 
 interface AIAssistantProps {
   visible: boolean;
@@ -20,12 +21,34 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ visible, onClose, onFullscree
   const [aiMessages, setAiMessages] = useState<AIMessage[]>([]);
   const [userInput, setUserInput] = useState('');
   const [skillPrefix, setSkillPrefix] = useState('');
+  const [context, setContext] = useState<any>(null);
   const [isVoiceMode, setIsVoiceMode] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
   const [recognizedText, setRecognizedText] = useState('');
   const [isTyping, setIsTyping] = useState(false);
-  const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const typingIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // 监听外部打开AI助手事件
+  useEffect(() => {
+    const handleOpenAiAssistant = (event: CustomEvent) => {
+      const { skill, input, context } = event.detail || {};
+      if (skill) {
+        setSkillPrefix(skill);
+      }
+      if (input) {
+        setUserInput(input);
+      }
+      if (context) {
+        setContext(context);
+      }
+    };
+
+    window.addEventListener('openAiAssistant', handleOpenAiAssistant as EventListener);
+    return () => {
+      window.removeEventListener('openAiAssistant', handleOpenAiAssistant as EventListener);
+    };
+  }, []);
 
   // 处理AI对话
   const handleSendMessage = () => {
@@ -35,6 +58,37 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ visible, onClose, onFullscree
     // 添加用户消息
     setAiMessages([...aiMessages, {text: fullInput, isUser: true}]);
     
+    // 检查是否是运价分析请求
+    if (skillPrefix === '运价分析') {
+      // 检查上下文
+      if (context && context.type === 'filter' && Object.keys(context.filters).every(k => !context.filters[k])) {
+        // 筛选栏为空且用户未提供额外信息（简单判断）
+        if (userInput === '根据当前筛选条件与本页运价，进行运价分析') {
+          setTimeout(() => {
+            setAiMessages(prev => [...prev, {
+              text: '检测到您的筛选栏为空，请先选择筛选条件或直接告诉我您想分析的运价需求（例如："分析上海到洛杉矶的20GP运价"）。',
+              isUser: false
+            }]);
+            setUserInput('');
+          }, 500);
+          return;
+        }
+      }
+
+      // 模拟AI分析过程
+      setTimeout(() => {
+        setAiMessages(prev => [...prev, {
+          text: `收到，正在为您进行运价分析...`,
+          isUser: false,
+          component: <FreightRateAnalysisResult context={context} />
+        }]);
+        setUserInput('');
+        setSkillPrefix('');
+        setContext(null); // 清除上下文
+      }, 500);
+      return;
+    }
+
     // 检查是否是订单跟踪请求
     if (skillPrefix === '订单跟踪' && userInput.trim() !== '') {
       // 提取订单号（假设用户输入的就是订单号）

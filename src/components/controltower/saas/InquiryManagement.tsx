@@ -283,6 +283,48 @@ const InquiryManagement: React.FC = () => {
   const [draggedFilterField, setDraggedFilterField] = useState<string | null>(null);
   const [dragOverFilterField, setDragOverFilterField] = useState<string | null>(null);
 
+  // 未读状态管理
+  const [readIds, setReadIds] = useState<string[]>(() => {
+    try {
+      return JSON.parse(localStorage.getItem('inquiry_read_ids_demo_v1') || '[]');
+    } catch {
+      return [];
+    }
+  });
+
+  // 获取通知列表
+  const getNotifications = (record: InquiryItem): string[] => {
+    const notifications: string[] = [];
+    
+    // 只有当所有相关报价状态都为“已报价”时，才视为可能未读
+    // 这里简化逻辑：只要状态是已报价且不在已读列表中，就显示红点
+    // 根据需求：头程、干线、尾程同时变为"已报价"
+    const allQuoted = record.firstQuoteStatus === '已报价' && 
+                      record.mainQuoteStatus === '已报价' && 
+                      record.lastQuoteStatus === '已报价';
+    
+    if (allQuoted && !readIds.includes(record.inquiryNo)) {
+      notifications.push('已完成全部报价');
+    }
+    
+    return notifications;
+  };
+
+  // 检查是否未读
+  const isUnread = (record: InquiryItem) => {
+    return getNotifications(record).length > 0;
+  };
+
+  // 标记为已读
+  const markAsRead = (inquiryNo: string) => {
+    if (!readIds.includes(inquiryNo)) {
+      const newReadIds = [...readIds, inquiryNo];
+      setReadIds(newReadIds);
+      localStorage.setItem('inquiry_read_ids_demo_v1', JSON.stringify(newReadIds));
+      window.dispatchEvent(new CustomEvent('INQUIRY_UNREAD_UPDATE'));
+    }
+  };
+
   // useEffect 初始化字段顺序
   useEffect(() => {
     const fields = Object.keys(columnVisibility);
@@ -862,7 +904,76 @@ const InquiryManagement: React.FC = () => {
   const getColumns = () => {
     // 基础列（所有类型共有）
     const baseColumns: ColumnItem[] = [
-      { title: '询价编号', dataIndex: 'inquiryNo', width: 140, sorter: true, resizable: true, render: (val: string) => <Tooltip content={val} mini><span className="no-ellipsis">{val}</span></Tooltip> },
+      { 
+        title: '询价编号', 
+        dataIndex: 'inquiryNo', 
+        width: 140, 
+        sorter: true, 
+        resizable: true, 
+        render: (val: string, record: InquiryItem) => {
+          const notifications = getNotifications(record);
+          const hasNotifications = notifications.length > 0;
+
+          return (
+            <div style={{ display: 'flex', alignItems: 'center' }}>
+              {hasNotifications && (
+                <Tooltip 
+                  position="bl"
+                  color="#fff"
+                  mouseLeaveDelay={0}
+                  popupHoverStay={false}
+                  content={
+                    <div style={{ textAlign: 'left', minWidth: '160px', padding: '8px 4px' }}>
+                      <div style={{ 
+                        color: '#FF7D00', 
+                        fontSize: '14px', 
+                        fontWeight: 600, 
+                        marginBottom: '8px', 
+                        paddingBottom: '8px',
+                        borderBottom: '1px solid #F2F3F5',
+                        display: 'flex',
+                        alignItems: 'center'
+                      }}>
+                        <span style={{ marginRight: '6px' }}>🔔</span>
+                        消息提醒
+                      </div>
+                      <ul style={{ paddingLeft: '20px', margin: 0, listStyleType: 'disc', color: '#1D2129' }}>
+                        {notifications.map((note, index) => (
+                          <li key={index} style={{ marginBottom: index === notifications.length - 1 ? 0 : 8, fontSize: '13px', lineHeight: '1.5' }}>
+                            {note}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  }
+                >
+                  <div 
+                    className="premium-red-dot animate" 
+                    style={{ 
+                      marginRight: 8,
+                      width: '16px',
+                      height: '16px',
+                      borderRadius: '50%',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      color: '#fff',
+                      fontSize: '10px',
+                      lineHeight: 1,
+                      cursor: 'pointer'
+                    }}
+                  >
+                    {notifications.length}
+                  </div>
+                </Tooltip>
+              )}
+              <Tooltip content={val} mini>
+                <span className="no-ellipsis">{val}</span>
+              </Tooltip>
+            </div>
+          );
+        } 
+      },
       { title: '询价来源', dataIndex: 'source', width: 100, sorter: true, resizable: true, render: (val: string) => <Tooltip content={val} mini><span className="no-ellipsis">{val}</span></Tooltip> },
       { title: '询价人', dataIndex: 'inquirer', width: 100, sorter: true, resizable: true, render: (val: string) => <Tooltip content={val} mini><span className="no-ellipsis">{val}</span></Tooltip> },
       { 
@@ -1086,14 +1197,20 @@ const InquiryManagement: React.FC = () => {
               <Button 
                 type="text" 
                 size="small" 
-                onClick={() => navigate(`/controltower/saas/inquiry-detail/${activeTab}/${record.inquiryNo}`)}
+                onClick={() => {
+                  markAsRead(record.inquiryNo);
+                  navigate(`/controltower/saas/inquiry-detail/${activeTab}/${record.inquiryNo}`);
+                }}
               >
                 详情
               </Button>
               <Button 
                 type="text" 
                 size="small"
-                onClick={() => navigate(`/controltower/saas/edit-inquiry/${activeTab}/${record.inquiryNo}`)}
+                onClick={() => {
+                  markAsRead(record.inquiryNo);
+                  navigate(`/controltower/saas/edit-inquiry/${activeTab}/${record.inquiryNo}`);
+                }}
               >
                 编辑
               </Button>
@@ -1136,6 +1253,21 @@ const InquiryManagement: React.FC = () => {
   // 整箱数据
   const fclData: InquiryItem[] = [
     {
+      inquiryNo: 'R20249998', source: '内部', inquirer: '演示用户', inquiryStatus: '已提交', firstQuoteStatus: '已报价', mainQuoteStatus: '已报价', lastQuoteStatus: '已报价', containerInfo: '2*20GP', cargoReadyTime: '1周内', cargoNature: '询价', shipCompany: 'MSK | 马士基', transitType: '直达', route: '跨太平洋东行', departurePort: 'CNNGB | Ningbo', dischargePort: 'USLGB | Long Beach', remark: '演示数据-未读', createdAt: '2024-05-16 09:00:00', clientType: '正式客户', clientName: '演示客户A', entryPerson: '演示用户', createDate: '2024-05-16 09:00:00', rateModifier: '系统', modifyDate: '2024-05-16 10:00:00',
+    },
+    {
+      inquiryNo: 'R20249999', source: '内部', inquirer: '演示用户', inquiryStatus: '已提交', firstQuoteStatus: '已报价', mainQuoteStatus: '已报价', lastQuoteStatus: '已报价', containerInfo: '1*40HC', cargoReadyTime: '3天内', cargoNature: '实单', shipCompany: 'CMA | 达飞轮船', transitType: '直达', route: '远东西行', departurePort: 'CNSHA | Shanghai', dischargePort: 'NLRTM | Rotterdam', remark: '演示数据-未读', createdAt: '2024-05-16 09:30:00', clientType: '正式客户', clientName: '演示客户B', entryPerson: '演示用户', createDate: '2024-05-16 09:30:00', rateModifier: '系统', modifyDate: '2024-05-16 10:30:00',
+    },
+    {
+      inquiryNo: 'R20249995', source: '内部', inquirer: '演示用户', inquiryStatus: '已提交', firstQuoteStatus: '已报价', mainQuoteStatus: '已报价', lastQuoteStatus: '已报价', containerInfo: '1*20GP', cargoReadyTime: '1周内', cargoNature: '询价', shipCompany: 'MSC | 地中海航运', transitType: '中转', route: '地中海航线', departurePort: 'CNSHA | Shanghai', dischargePort: 'ITGOA | Genoa', remark: '演示数据-未读', createdAt: '2024-05-16 10:00:00', clientType: '正式客户', clientName: '演示客户C', entryPerson: '演示用户', createDate: '2024-05-16 10:00:00', rateModifier: '系统', modifyDate: '2024-05-16 11:00:00',
+    },
+    {
+      inquiryNo: 'R20249996', source: '内部', inquirer: '演示用户', inquiryStatus: '已提交', firstQuoteStatus: '已报价', mainQuoteStatus: '已报价', lastQuoteStatus: '已报价', containerInfo: '2*40HC', cargoReadyTime: '2周内', cargoNature: '实单', shipCompany: 'HPL | 赫伯罗特', transitType: '直达', route: '欧洲航线', departurePort: 'CNYTN | Yantian', dischargePort: 'DEHAM | Hamburg', remark: '演示数据-未读', createdAt: '2024-05-16 10:30:00', clientType: '正式客户', clientName: '演示客户D', entryPerson: '演示用户', createDate: '2024-05-16 10:30:00', rateModifier: '系统', modifyDate: '2024-05-16 11:30:00',
+    },
+    {
+      inquiryNo: 'R20249997', source: '内部', inquirer: '演示用户', inquiryStatus: '已提交', firstQuoteStatus: '已报价', mainQuoteStatus: '已报价', lastQuoteStatus: '已报价', containerInfo: '1*40GP', cargoReadyTime: '3天内', cargoNature: '询价', shipCompany: 'EMC | 长荣海运', transitType: '直达', route: '美西航线', departurePort: 'CNXMN | Xiamen', dischargePort: 'USLAX | Los Angeles', remark: '演示数据-未读', createdAt: '2024-05-16 11:00:00', clientType: '正式客户', clientName: '演示客户E', entryPerson: '演示用户', createDate: '2024-05-16 11:00:00', rateModifier: '系统', modifyDate: '2024-05-16 12:00:00',
+    },
+    {
       inquiryNo: 'R20240001', source: '内部', inquirer: '张三', inquiryStatus: '草稿', firstQuoteStatus: '待报价', mainQuoteStatus: '待报价', lastQuoteStatus: '待报价', containerInfo: '1*20GP+2*40HC', cargoReadyTime: '1周内', cargoNature: '询价', shipCompany: '不指定', transitType: '直达', route: '跨太平洋东行', departurePort: 'CNSHA | Shanghai', dischargePort: 'USLAX | Los Angeles', remark: '电子产品 优先考虑直达航线', createdAt: '2024-05-10 08:30:15', clientType: '正式客户', clientName: '上海测试', entryPerson: '张三', createDate: '2024-05-10 08:30:15', rateModifier: '李四', modifyDate: '2024-05-10 10:30:15',
     },
     {
@@ -1177,19 +1309,44 @@ const InquiryManagement: React.FC = () => {
 
   // 根据当前Tab获取对应数据
   const getCurrentData = () => {
+    let currentData: InquiryItem[] = [];
     switch(activeTab) {
       case 'fcl':
-        return fclData;
+        currentData = fclData;
+        break;
       case 'lcl':
-        return lclData;
+        currentData = lclData;
+        break;
       case 'air':
-        return airData;
+        currentData = airData;
+        break;
       default:
-        return fclData;
+        currentData = fclData;
     }
+    
+    // 排序：未读置顶
+    return [...currentData].sort((a, b) => {
+      const aUnread = isUnread(a);
+      const bUnread = isUnread(b);
+      if (aUnread && !bUnread) return -1;
+      if (!aUnread && bUnread) return 1;
+      return 0;
+    });
   };
   
   const data = getCurrentData();
+
+  // 监听数据变化，更新全局未读数量
+  useEffect(() => {
+    // 计算所有类型的未读总数（不仅是当前Tab）
+    // 这里为了演示，假设只计算当前Tab的未读数，或者应该合并所有数据
+    // 简单起见，我们计算所有数据的未读数
+    const allData = [...fclData, ...lclData, ...airData];
+    const unreadCount = allData.filter(item => isUnread(item)).length;
+    
+    localStorage.setItem('inquiry_unread_count', String(unreadCount));
+    window.dispatchEvent(new CustomEvent('INQUIRY_UNREAD_UPDATE'));
+  }, [readIds, activeTab]); // 当已读列表或Tab变化时更新
 
   const pagination = {
     showTotal: true,

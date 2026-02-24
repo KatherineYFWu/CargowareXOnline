@@ -10,7 +10,8 @@ import {
   Input,
   Select,
   DatePicker,
-  Grid
+  Grid,
+  Badge
 } from '@arco-design/web-react';
 import { 
   IconDownload,
@@ -33,11 +34,50 @@ interface InquiryItem {
   destination: string;
   createTime: string;
   validUntil: string;
+  preCarriageStatus: string;
+  mainCarriageStatus: string;
+  onCarriageStatus: string;
 }
 
 const InquiryManagement: React.FC = () => {
   const [selectedRowKeys, setSelectedRowKeys] = useState<(string | number)[]>([]);
+  const [readIds, setReadIds] = useState<string[]>(() => {
+    try {
+      // 更改 key 以重置状态，用于演示
+      return JSON.parse(localStorage.getItem('inquiry_read_ids_demo_v1') || '[]');
+    } catch {
+      return [];
+    }
+  });
   const [form] = Form.useForm();
+
+  // 检查是否未读
+  const isUnread = (record: InquiryItem) => {
+    const unread = record.preCarriageStatus === '已报价' && 
+           record.mainCarriageStatus === '已报价' && 
+           record.onCarriageStatus === '已报价' && 
+           !readIds.includes(record.key);
+    return unread;
+  };
+
+  // 更新全局未读状态
+  React.useEffect(() => {
+    // 计算当前是否有未读项
+    // 注意：这里的 data 是在组件内部定义的，如果 data 是动态获取的，应该放在 useEffect 依赖里
+    // 由于 data 目前是模拟的静态数据（每次渲染重新生成），我们需要将其固定下来或者在这里直接计算
+    // 为了演示，我们将 data 移到组件外或使用 useMemo，这里暂时在 effect 里重新生成一遍用于计算（这在真实项目中不好，但在 demo 中可行）
+    // 或者更好的是，我们将 data 定义在组件外
+  }, [readIds]);
+
+  const handleEdit = (record: InquiryItem) => {
+    if (isUnread(record)) {
+      const newReadIds = [...readIds, record.key];
+      setReadIds(newReadIds);
+      localStorage.setItem('inquiry_read_ids_demo_v1', JSON.stringify(newReadIds));
+      window.dispatchEvent(new CustomEvent('INQUIRY_UNREAD_UPDATE'));
+    }
+    Message.info(`编辑询价单：${record.inquiryNo}`);
+  };
 
   const handleSearch = async () => {
     try {
@@ -60,10 +100,29 @@ const InquiryManagement: React.FC = () => {
       title: '询价编号',
       dataIndex: 'inquiryNo',
       width: 150,
-      render: (value: string) => <a href="#" className="text-blue-600">{value}</a>,
+      render: (value: string, record: InquiryItem) => (
+        <div style={{ display: 'flex', alignItems: 'center' }}>
+          {isUnread(record) && (
+            <div className="premium-red-dot animate" style={{ marginRight: 8 }} />
+          )}
+          <a href="#" className="text-blue-600">{value}</a>
+        </div>
+      ),
     },
     {
-      title: '状态',
+      title: '询价来源',
+      dataIndex: 'source',
+      width: 100,
+      render: () => '内部',
+    },
+    {
+      title: '询价人',
+      dataIndex: 'inquirer',
+      width: 100,
+      render: (_: unknown, record: InquiryItem) => ['张三', '李四', '王五', '赵六'][Number(record.key) % 4],
+    },
+    {
+      title: '询价状态',
       dataIndex: 'status',
       width: 120,
       render: (value: string) => {
@@ -71,35 +130,46 @@ const InquiryManagement: React.FC = () => {
           '待报价': 'orange',
           '已报价': 'green',
           '已失效': 'red',
-          '已确认': 'blue'
+          '已确认': 'blue',
+          '草稿': 'gray',
+          '已提交': 'cyan',
+          '拒绝报价': 'red'
         };
         return <Tag color={colorMap[value]}>{value}</Tag>;
       },
     },
     {
-      title: '运输类型',
-      dataIndex: 'type',
+      title: '头程报价状态',
+      dataIndex: 'preCarriageStatus',
       width: 120,
+      render: (value: string) => {
+        const colorMap: Record<string, string> = { '待报价': 'orange', '已报价': 'green', '拒绝报价': 'red' };
+        return <Tag color={colorMap[value]}>{value}</Tag>;
+      },
     },
     {
-      title: '起运地',
-      dataIndex: 'origin',
+      title: '干线报价状态',
+      dataIndex: 'mainCarriageStatus',
+      width: 120,
+      render: (value: string) => {
+        const colorMap: Record<string, string> = { '待报价': 'orange', '已报价': 'green', '拒绝报价': 'red' };
+        return <Tag color={colorMap[value]}>{value}</Tag>;
+      },
+    },
+    {
+      title: '尾程报价状态',
+      dataIndex: 'onCarriageStatus',
+      width: 120,
+      render: (value: string) => {
+        const colorMap: Record<string, string> = { '待报价': 'orange', '已报价': 'green', '拒绝报价': 'red' };
+        return <Tag color={colorMap[value]}>{value}</Tag>;
+      },
+    },
+    {
+      title: '箱型箱量',
+      dataIndex: 'containerInfo',
       width: 150,
-    },
-    {
-      title: '目的地',
-      dataIndex: 'destination',
-      width: 150,
-    },
-    {
-      title: '创建时间',
-      dataIndex: 'createTime',
-      width: 180,
-    },
-    {
-      title: '有效期至',
-      dataIndex: 'validUntil',
-      width: 180,
+      render: () => '1*20GP+2*40HC',
     },
     {
       title: '操作',
@@ -110,40 +180,101 @@ const InquiryManagement: React.FC = () => {
           <Button 
             type="text" 
             size="small" 
+            render={() => <span>详情</span>}
+            onClick={() => handleEdit(record)}
+          >
+             详情
+          </Button>
+          <Button 
+            type="text" 
+            size="small" 
             icon={<IconEdit />}
-            onClick={() => {
-              Message.info(`编辑询价单：${record.inquiryNo}`);
-            }}
+            onClick={() => handleEdit(record)}
           >
             编辑
           </Button>
           <Button 
             type="text" 
             size="small" 
-            status="danger" 
-            icon={<IconDelete />}
-            onClick={() => {
-              Message.info(`删除询价单：${record.inquiryNo}`);
-            }}
+            render={() => <span>更多</span>}
           >
-            删除
+             更多
           </Button>
         </Space>
       ),
     }
   ];
 
-  // 模拟数据
-  const data: InquiryItem[] = Array(10).fill(null).map((_, index) => ({
-    key: `${index}`,
-    inquiryNo: `INQ${String(index + 1).padStart(6, '0')}`,
-    status: ['待报价', '已报价', '已失效', '已确认'][Math.floor(Math.random() * 4)],
-    type: ['海运', '空运', '铁运', '公路'][Math.floor(Math.random() * 4)],
-    origin: ['深圳', '上海', '广州', '青岛'][Math.floor(Math.random() * 4)],
-    destination: ['汉堡', '鹿特丹', '洛杉矶', '迪拜'][Math.floor(Math.random() * 4)],
-    createTime: '2024-03-15 14:30:00',
-    validUntil: '2024-04-15 23:59:59',
-  }));
+  // 模拟数据 - 使用 useMemo 保证数据稳定，同时根据 readIds 排序
+  const data: InquiryItem[] = React.useMemo(() => {
+    const rawData = Array(10).fill(null).map((_, index) => {
+      // 构造前几个为“已报价”且可能未读的数据
+      const isQuoted = index < 3; 
+      
+      return {
+        key: `${index}`,
+        inquiryNo: `R2024${String(index + 1).padStart(4, '0')}`,
+        status: isQuoted ? '已报价' : ['草稿', '已提交'][index % 2],
+        type: ['海运', '空运', '铁运', '公路'][index % 4],
+        origin: ['深圳', '上海', '广州', '青岛'][index % 4],
+        destination: ['汉堡', '鹿特丹', '洛杉矶', '迪拜'][index % 4],
+        createTime: '2024-03-15 14:30:00',
+        validUntil: '2024-04-15 23:59:59',
+        preCarriageStatus: isQuoted ? '已报价' : (index === 3 ? '拒绝报价' : '待报价'),
+        mainCarriageStatus: isQuoted ? '已报价' : (index === 4 ? '已报价' : '待报价'),
+        onCarriageStatus: isQuoted ? '已报价' : (index === 5 ? '拒绝报价' : '待报价'),
+      };
+    });
+
+    // 添加两条额外的未读询价数据
+    const extraData: InquiryItem[] = [
+      {
+        key: '9998',
+        inquiryNo: 'R20249998',
+        status: '已报价',
+        type: '海运',
+        origin: '宁波',
+        destination: '纽约',
+        createTime: '2024-03-16 09:15:00',
+        validUntil: '2024-04-16 23:59:59',
+        preCarriageStatus: '已报价',
+        mainCarriageStatus: '已报价',
+        onCarriageStatus: '已报价'
+      },
+      {
+        key: '9999',
+        inquiryNo: 'R20249999',
+        status: '已报价',
+        type: '空运',
+        origin: '北京',
+        destination: '伦敦',
+        createTime: '2024-03-16 10:20:00',
+        validUntil: '2024-04-16 23:59:59',
+        preCarriageStatus: '已报价',
+        mainCarriageStatus: '已报价',
+        onCarriageStatus: '已报价'
+      }
+    ];
+
+    // 合并数据
+    const allData = [...rawData, ...extraData];
+
+    // 排序：未读置顶
+    return allData.sort((a, b) => {
+      const aUnread = isUnread(a);
+      const bUnread = isUnread(b);
+      if (aUnread && !bUnread) return -1;
+      if (!aUnread && bUnread) return 1;
+      return 0;
+    });
+  }, [readIds]); // 当 readIds 变化时重新排序
+
+  // 监听数据变化，更新全局未读数量
+  React.useEffect(() => {
+    const unreadCount = data.filter(item => isUnread(item)).length;
+    localStorage.setItem('inquiry_unread_count', String(unreadCount));
+    window.dispatchEvent(new CustomEvent('INQUIRY_UNREAD_UPDATE'));
+  }, [data, readIds]);
 
   const pagination = {
     showTotal: true,

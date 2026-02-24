@@ -7,7 +7,7 @@
       animation: 'aurora 15s ease infinite'
     }"
   >
-    <!-- 极光效果层 -->
+    <!-- Aurora Effect Layer -->
     <div 
       class="absolute inset-0 opacity-30"
       :style="{
@@ -27,7 +27,7 @@
           filter: 'drop-shadow(2px 2px 4px rgba(0,0,0,0.3))'
         }"
       >
-        准备开始您的智能物流之旅？
+        Ready to Start Your Smart Logistics Journey?
       </h2>
       <p 
         class="text-xl mb-8"
@@ -38,7 +38,7 @@
           textShadow: '0 0 20px rgba(255,255,255,0.3)'
         }"
       >
-        立即体验WallTech控制塔系统，感受AI带来的变革
+        Experience the WallTech Control Tower System Now and Feel the AI Revolution
       </p>
       
       <div class="flex flex-col sm:flex-row gap-4 justify-center">
@@ -46,13 +46,13 @@
           class="h-12 px-8 bg-gradient-to-r from-blue-600 to-indigo-600 border-0 text-lg shadow-lg hover:shadow-xl transition-all text-white font-bold"
           @click="handleGetStarted"
         >
-          立即开始
+          Get Started
         </button>
         <button 
           class="h-12 px-8 border-2 border-white text-white text-lg hover:bg-white hover:text-blue-600 transition-all font-bold"
           @click="handleContact"
         >
-          联系我们
+          Contact Us
         </button>
       </div>
     </div>
@@ -110,4 +110,4 @@ button {
 button:hover {
   transform: translateY(-2px);
 }
-</style> 
+</style>

@@ -311,7 +311,7 @@ const SOPQuery: React.FC<SOPQueryProps> = ({ sopData }) => {
       
       {/* 运踪时间线 */}
       <div style={{ marginTop: '20px' }}>
-        {sopData.nodes.map((node, index) => (
+        {sopData.nodes.map((node) => (
           <div key={node.id} className="tracking-timeline-item" style={{ 
             display: 'flex', 
             alignItems: 'center', 
